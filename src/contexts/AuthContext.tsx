@@ -1,26 +1,31 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, AuthState, SubscriptionPlan } from '../types';
+import { User, AuthState, APIKeys, LLMProvider } from '../types';
 
 interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, name?: string) => Promise<void>;
   logout: () => void;
-  updateSubscription: (plan: SubscriptionPlan) => Promise<void>;
-  deductTokens: (amount: number) => void;
+  updateAPIKeys: (keys: Partial<APIKeys>) => void;
+  updatePreferences: (prefs: Partial<User['preferences']>) => void;
+  hasAPIKey: (provider: LLMProvider) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Mock user data for demo
-const MOCK_USER: User = {
-  id: '1',
-  email: 'demo@transor.com',
-  name: 'Demo User',
-  subscriptionPlan: 'free',
-  tokensRemaining: 0,
-  tokensTotal: 0,
+const createDefaultUser = (email: string, name?: string): User => ({
+  id: Math.random().toString(36).substr(2, 9),
+  email,
+  name,
+  apiKeys: {},
+  preferences: {
+    defaultProvider: 'openai',
+    theme: 'system',
+    language: 'en',
+  },
   createdAt: new Date(),
-};
+  lastLogin: new Date(),
+});
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [state, setState] = useState<AuthState>({
@@ -33,28 +38,38 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Check for stored user session
     const storedUser = localStorage.getItem('transor_user');
     if (storedUser) {
-      setState({
-        user: JSON.parse(storedUser),
-        isAuthenticated: true,
-        isLoading: false,
-      });
+      try {
+        const user = JSON.parse(storedUser);
+        setState({
+          user,
+          isAuthenticated: true,
+          isLoading: false,
+        });
+      } catch {
+        setState(prev => ({ ...prev, isLoading: false }));
+      }
     } else {
       setState(prev => ({ ...prev, isLoading: false }));
     }
   }, []);
 
   const login = async (email: string, password: string) => {
-    // Mock login - replace with actual API call
     setState(prev => ({ ...prev, isLoading: true }));
     
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 800));
     
-    const user: User = {
-      ...MOCK_USER,
-      email,
-    };
+    // Check if user exists in localStorage
+    const existingUsers = JSON.parse(localStorage.getItem('transor_users') || '[]');
+    let user = existingUsers.find((u: User) => u.email === email);
     
+    if (!user) {
+      user = createDefaultUser(email);
+      existingUsers.push(user);
+      localStorage.setItem('transor_users', JSON.stringify(existingUsers));
+    }
+    
+    user.lastLogin = new Date();
     localStorage.setItem('transor_user', JSON.stringify(user));
     setState({
       user,
@@ -64,17 +79,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const signup = async (email: string, password: string, name?: string) => {
-    // Mock signup - replace with actual API call
     setState(prev => ({ ...prev, isLoading: true }));
     
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 800));
     
-    const user: User = {
-      ...MOCK_USER,
-      email,
-      name,
-    };
+    const user = createDefaultUser(email, name);
+    
+    // Store in users list
+    const existingUsers = JSON.parse(localStorage.getItem('transor_users') || '[]');
+    existingUsers.push(user);
+    localStorage.setItem('transor_users', JSON.stringify(existingUsers));
     
     localStorage.setItem('transor_user', JSON.stringify(user));
     setState({
@@ -93,22 +108,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
   };
 
-  const updateSubscription = async (plan: SubscriptionPlan) => {
+  const updateAPIKeys = (keys: Partial<APIKeys>) => {
     if (!state.user) return;
-
-    const tokensByPlan = {
-      free: 0,
-      pro: 100000,
-      enterprise: 1000000,
-    };
 
     const updatedUser: User = {
       ...state.user,
-      subscriptionPlan: plan,
-      tokensTotal: tokensByPlan[plan],
-      tokensRemaining: tokensByPlan[plan],
-      subscriptionStartDate: new Date(),
-      subscriptionEndDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+      apiKeys: {
+        ...state.user.apiKeys,
+        ...keys,
+      },
     };
 
     localStorage.setItem('transor_user', JSON.stringify(updatedUser));
@@ -118,12 +126,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }));
   };
 
-  const deductTokens = (amount: number) => {
+  const updatePreferences = (prefs: Partial<User['preferences']>) => {
     if (!state.user) return;
 
     const updatedUser: User = {
       ...state.user,
-      tokensRemaining: Math.max(0, state.user.tokensRemaining - amount),
+      preferences: {
+        ...state.user.preferences,
+        ...prefs,
+      },
     };
 
     localStorage.setItem('transor_user', JSON.stringify(updatedUser));
@@ -131,6 +142,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       ...prev,
       user: updatedUser,
     }));
+  };
+
+  const hasAPIKey = (provider: LLMProvider): boolean => {
+    return !!(state.user?.apiKeys[provider]);
   };
 
   return (
@@ -140,8 +155,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         login,
         signup,
         logout,
-        updateSubscription,
-        deductTokens,
+        updateAPIKeys,
+        updatePreferences,
+        hasAPIKey,
       }}
     >
       {children}
@@ -156,4 +172,3 @@ export const useAuth = () => {
   }
   return context;
 };
-

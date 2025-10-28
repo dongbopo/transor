@@ -80,3 +80,77 @@
     display: none;
   }
 }
+
+/* Mobile & Tablet Responsive Enhancements */
+@media (max-width: 768px) {
+  /* Reduce card padding on mobile */
+  .card {
+    @apply p-4 rounded;
+  }
+  
+  /* Smaller buttons on mobile */
+  .btn-primary,
+  .btn-secondary,
+  .btn-outline {
+    @apply py-2 px-3 text-sm;
+  }
+  
+  /* Compact stat cards */
+  .stat-card {
+    @apply p-3;
+  }
+  
+  /* Touch-friendly nav links */
+  .nav-link,
+  .nav-link-active {
+    @apply py-2.5;
+  }
+  
+  /* Thinner scrollbars on mobile */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 4px;
+  }
+  
+  /* Prevent zoom on input focus (iOS) */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* Tablet specific */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .card {
+    @apply p-5;
+  }
+}
+
+/* Touch-friendly targets for all touch devices */
+@media (hover: none) and (pointer: coarse) {
+  button,
+  a,
+  [role="button"],
+  input[type="checkbox"],
+  input[type="radio"] {
+    min-height: 44px;
+  }
+  
+  /* Larger tap targets for interactive elements */
+  .nav-link,
+  .nav-link-active {
+    min-height: 48px;
+  }
+}

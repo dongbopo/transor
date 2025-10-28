@@ -1,188 +1,283 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Settings, Globe, Database, Keyboard, Eye, EyeOff } from 'lucide-react';
-import { useSettingsContext } from '../contexts/SettingsContext';
-import LanguageSelector from '../components/LanguageSelector';
-import DomainSelector from '../components/DomainSelector';
+import { Key, Moon, Sun, Monitor, Eye, EyeOff, Check, AlertCircle } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
+import { LLMProvider } from '../types';
+import toast from 'react-hot-toast';
 
 const SettingsPage: React.FC = () => {
-  const { state, updateSettings } = useSettingsContext();
+  const { user, updateAPIKeys, updatePreferences } = useAuth();
+  const { theme, setTheme, actualTheme } = useTheme();
+  
+  const [apiKeys, setApiKeys] = useState({
+    openai: user?.apiKeys.openai || '',
+    gemini: user?.apiKeys.gemini || '',
+    grok: user?.apiKeys.grok || '',
+    claude: user?.apiKeys.claude || '',
+  });
 
-  const handleLanguageChange = (language: string) => {
-    updateSettings({ defaultTargetLanguage: language });
+  const [showKeys, setShowKeys] = useState({
+    openai: false,
+    gemini: false,
+    grok: false,
+    claude: false,
+  });
+
+  const [savingKeys, setSavingKeys] = useState<LLMProvider | null>(null);
+
+  const providers = [
+    {
+      id: 'openai' as LLMProvider,
+      name: 'OpenAI',
+      description: 'GPT-4, GPT-3.5 Turbo',
+      placeholder: 'sk-...',
+      helpUrl: 'https://platform.openai.com/api-keys',
+      color: 'from-green-500 to-teal-500',
+    },
+    {
+      id: 'gemini' as LLMProvider,
+      name: 'Google Gemini',
+      description: 'Gemini Pro, Gemini Ultra',
+      placeholder: 'AIza...',
+      helpUrl: 'https://makersuite.google.com/app/apikey',
+      color: 'from-blue-500 to-indigo-500',
+    },
+    {
+      id: 'grok' as LLMProvider,
+      name: 'xAI Grok',
+      description: 'Grok-1, Grok-2',
+      placeholder: 'xai-...',
+      helpUrl: 'https://x.ai/api',
+      color: 'from-gray-700 to-gray-900',
+    },
+    {
+      id: 'claude' as LLMProvider,
+      name: 'Anthropic Claude',
+      description: 'Claude 3 Opus, Sonnet, Haiku',
+      placeholder: 'sk-ant-...',
+      helpUrl: 'https://console.anthropic.com/settings/keys',
+      color: 'from-purple-500 to-pink-500',
+    },
+  ];
+
+  const handleSaveKey = async (provider: LLMProvider) => {
+    const key = apiKeys[provider].trim();
+    if (!key) {
+      toast.error('Please enter an API key');
+      return;
+    }
+
+    setSavingKeys(provider);
+    
+    // Simulate API validation
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    updateAPIKeys({ [provider]: key });
+    toast.success(`${providers.find(p => p.id === provider)?.name} API key saved!`);
+    setSavingKeys(null);
   };
 
-  const handleDomainChange = (domain: any) => {
-    updateSettings({ defaultDomain: domain });
+  const handleRemoveKey = (provider: LLMProvider) => {
+    updateAPIKeys({ [provider]: undefined });
+    setApiKeys(prev => ({ ...prev, [provider]: '' }));
+    toast.success(`${providers.find(p => p.id === provider)?.name} API key removed`);
   };
 
-  const handleStorageProviderChange = (provider: any) => {
-    updateSettings({ storageProvider: provider });
-  };
-
-  const handleTogglePrivacyNotice = () => {
-    updateSettings({ showPrivacyNotice: !state.settings.showPrivacyNotice });
-  };
-
-  const handleToggleRTLSupport = () => {
-    updateSettings({ rtlSupport: !state.settings.rtlSupport });
-  };
-
-  const handleToggleKeyboardShortcuts = () => {
-    updateSettings({ keyboardShortcuts: !state.settings.keyboardShortcuts });
-  };
+  const themeOptions = [
+    { value: 'light', label: 'Light', icon: Sun },
+    { value: 'dark', label: 'Dark', icon: Moon },
+    { value: 'system', label: 'System', icon: Monitor },
+  ];
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto space-y-6">
+      {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <div className="flex items-center space-x-3 mb-8">
-          <Settings className="w-8 h-8 text-primary-600" />
-          <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          Settings
+        </h1>
+        <p className="text-gray-600 dark:text-gray-400">
+          Manage your API keys and preferences
+        </p>
+      </motion.div>
+
+      {/* Theme Settings */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="card"
+      >
+        <div className="flex items-center space-x-3 mb-4">
+          {actualTheme === 'dark' ? (
+            <Moon className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+          ) : (
+            <Sun className="w-5 h-5 text-orange-600" />
+          )}
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Appearance</h2>
+        </div>
+        
+        <div className="grid grid-cols-3 gap-3">
+          {themeOptions.map((option) => {
+            const Icon = option.icon;
+            const isSelected = theme === option.value;
+            
+            return (
+              <button
+                key={option.value}
+                onClick={() => setTheme(option.value as any)}
+                className={`
+                  relative p-4 rounded-lg border-2 transition-all
+                  ${isSelected
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                  }
+                `}
+              >
+                {isSelected && (
+                  <div className="absolute top-2 right-2">
+                    <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                      <Check className="w-3 h-3 text-white" />
+                    </div>
+                  </div>
+                )}
+                <Icon className={`w-6 h-6 mx-auto mb-2 ${
+                  isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'
+                }`} />
+                <p className={`text-sm font-medium ${
+                  isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'
+                }`}>
+                  {option.label}
+                </p>
+              </button>
+            );
+          })}
+        </div>
+      </motion.div>
+
+      {/* API Keys Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="card"
+      >
+        <div className="flex items-center space-x-3 mb-4">
+          <Key className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          <div className="flex-1">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">API Keys</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Add your own API keys to use Transor. Your keys are stored locally and never sent to our servers.
+            </p>
+          </div>
         </div>
 
-        <div className="grid gap-8">
-          {/* Default Language Settings */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="card"
-          >
-            <div className="flex items-center space-x-3 mb-6">
-              <Globe className="w-6 h-6 text-primary-600" />
-              <h2 className="text-xl font-semibold text-gray-900">Default Language</h2>
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+          <div className="flex items-start space-x-2">
+            <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-blue-900 dark:text-blue-100">
+              <p className="font-medium mb-1">Your keys, your control</p>
+              <p className="text-blue-700 dark:text-blue-300">
+                Transor doesn't charge for translations. You pay directly to the AI providers based on your usage. 
+                API keys are encrypted and stored only on your device.
+              </p>
             </div>
-            <LanguageSelector
-              value={state.settings.defaultTargetLanguage}
-              onChange={handleLanguageChange}
-            />
-          </motion.div>
+          </div>
+        </div>
 
-          {/* Default Domain Settings */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="card"
-          >
-            <div className="flex items-center space-x-3 mb-6">
-              <Settings className="w-6 h-6 text-primary-600" />
-              <h2 className="text-xl font-semibold text-gray-900">Default Domain</h2>
-            </div>
-            <DomainSelector
-              value={state.settings.defaultDomain}
-              onChange={handleDomainChange}
-            />
-          </motion.div>
+        <div className="space-y-4">
+          {providers.map((provider, index) => {
+            const hasKey = !!user?.apiKeys[provider.id];
+            const isVisible = showKeys[provider.id];
+            
+            return (
+              <motion.div
+                key={provider.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 + index * 0.1 }}
+                className="border border-gray-200 dark:border-gray-700 rounded-lg p-4"
+              >
+                <div className="flex items-start space-x-3 mb-3">
+                  <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${provider.color} flex items-center justify-center flex-shrink-0`}>
+                    <Key className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <h3 className="font-semibold text-gray-900 dark:text-white">
+                        {provider.name}
+                      </h3>
+                      {hasKey && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
+                          <Check className="w-3 h-3 mr-1" />
+                          Connected
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      {provider.description}
+                    </p>
+                  </div>
+                </div>
 
-          {/* Storage Settings */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="card"
-          >
-            <div className="flex items-center space-x-3 mb-6">
-              <Database className="w-6 h-6 text-primary-600" />
-              <h2 className="text-xl font-semibold text-gray-900">Storage Provider</h2>
-            </div>
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {[
-                  { value: 'local', label: 'Local Download', description: 'Download files directly to your device' },
-                  { value: 'lovable', label: 'Lovable Storage', description: 'Save files to Lovable cloud storage' },
-                  { value: 's3', label: 'S3 Compatible', description: 'Connect to your own S3-compatible storage' },
-                ].map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => handleStorageProviderChange(option.value)}
-                    className={`p-4 rounded-lg border-2 transition-all duration-200 text-left ${
-                      state.settings.storageProvider === option.value
-                        ? 'border-primary-500 bg-primary-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
+                <div className="space-y-2">
+                  <div className="flex space-x-2">
+                    <div className="flex-1 relative">
+                      <input
+                        type={isVisible ? 'text' : 'password'}
+                        value={apiKeys[provider.id]}
+                        onChange={(e) => setApiKeys(prev => ({
+                          ...prev,
+                          [provider.id]: e.target.value
+                        }))}
+                        placeholder={provider.placeholder}
+                        className="input-field pr-10"
+                      />
+                      <button
+                        onClick={() => setShowKeys(prev => ({
+                          ...prev,
+                          [provider.id]: !prev[provider.id]
+                        }))}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                      >
+                        {isVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    
+                    {hasKey ? (
+                      <button
+                        onClick={() => handleRemoveKey(provider.id)}
+                        className="btn-outline text-red-600 dark:text-red-400 border-red-300 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900/20"
+                      >
+                        Remove
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleSaveKey(provider.id)}
+                        disabled={savingKeys === provider.id || !apiKeys[provider.id].trim()}
+                        className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {savingKeys === provider.id ? 'Saving...' : 'Save'}
+                      </button>
+                    )}
+                  </div>
+                  
+                  <a
+                    href={provider.helpUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-blue-600 dark:text-blue-400 hover:underline inline-block"
                   >
-                    <h3 className="font-medium text-gray-900 mb-1">{option.label}</h3>
-                    <p className="text-sm text-gray-500">{option.description}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Accessibility Settings */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="card"
-          >
-            <div className="flex items-center space-x-3 mb-6">
-              <Keyboard className="w-6 h-6 text-primary-600" />
-              <h2 className="text-xl font-semibold text-gray-900">Accessibility & Display</h2>
-            </div>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium text-gray-900">Show Privacy Notice</h3>
-                  <p className="text-sm text-gray-500">Display privacy information on the upload page</p>
+                    Get your {provider.name} API key →
+                  </a>
                 </div>
-                <button
-                  onClick={handleTogglePrivacyNotice}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    state.settings.showPrivacyNotice ? 'bg-primary-600' : 'bg-gray-200'
-                  }`}
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      state.settings.showPrivacyNotice ? 'translate-x-6' : 'translate-x-1'
-                    }`}
-                  />
-                </button>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium text-gray-900">RTL Language Support</h3>
-                  <p className="text-sm text-gray-500">Enable right-to-left text direction for Arabic, Hebrew, etc.</p>
-                </div>
-                <button
-                  onClick={handleToggleRTLSupport}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    state.settings.rtlSupport ? 'bg-primary-600' : 'bg-gray-200'
-                  }`}
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      state.settings.rtlSupport ? 'translate-x-6' : 'translate-x-1'
-                    }`}
-                  />
-                </button>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium text-gray-900">Keyboard Shortcuts</h3>
-                  <p className="text-sm text-gray-500">Enable keyboard shortcuts for faster navigation</p>
-                </div>
-                <button
-                  onClick={handleToggleKeyboardShortcuts}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    state.settings.keyboardShortcuts ? 'bg-primary-600' : 'bg-gray-200'
-                  }`}
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      state.settings.keyboardShortcuts ? 'translate-x-6' : 'translate-x-1'
-                    }`}
-                  />
-                </button>
-              </div>
-            </div>
-          </motion.div>
+              </motion.div>
+            );
+          })}
         </div>
       </motion.div>
     </div>

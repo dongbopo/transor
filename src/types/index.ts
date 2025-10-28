@@ -240,20 +240,29 @@ export interface ProjectGlossary {
 }
 
 // Authentication & User Types
-export type SubscriptionPlan = 'free' | 'pro' | 'enterprise';
-
 export type LLMProvider = 'openai' | 'gemini' | 'grok' | 'claude';
+
+export interface APIKeys {
+  openai?: string;
+  gemini?: string;
+  grok?: string;
+  claude?: string;
+}
+
+export interface UserPreferences {
+  defaultProvider: LLMProvider;
+  theme: 'light' | 'dark' | 'system';
+  language: string;
+}
 
 export interface User {
   id: string;
   email: string;
   name?: string;
-  subscriptionPlan: SubscriptionPlan;
-  tokensRemaining: number;
-  tokensTotal: number;
-  subscriptionStartDate?: Date;
-  subscriptionEndDate?: Date;
+  apiKeys: APIKeys;
+  preferences: UserPreferences;
   createdAt: Date;
+  lastLogin: Date;
 }
 
 export interface AuthState {
@@ -262,18 +271,10 @@ export interface AuthState {
   isLoading: boolean;
 }
 
-export interface SubscriptionTier {
-  id: SubscriptionPlan;
-  name: string;
-  price: number;
-  tokens: number;
-  features: string[];
-  popular?: boolean;
-}
-
 export interface TokenUsage {
   documentId: string;
   provider: LLMProvider;
   tokensUsed: number;
   timestamp: Date;
+  cost?: number;
 }

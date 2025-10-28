@@ -1,256 +1,162 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Check, Zap, Crown, Star } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import { Key, Zap, Shield, DollarSign, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
-import { SubscriptionPlan } from '../types';
+import { useAuth } from '../contexts/AuthContext';
 
 const PricingPage: React.FC = () => {
-  const { user, updateSubscription, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
-  const pricingTiers = [
+  const features = [
     {
-      id: 'free' as SubscriptionPlan,
-      name: 'Free',
-      price: 0,
-      tokens: 0,
-      icon: Star,
-      description: 'Perfect for trying out Transor',
-      features: [
-        'View demo features',
-        'Explore the interface',
-        'See sample translations',
-        'Limited access',
-        'Community support',
-      ],
-      limitations: [
-        'No translation uploads',
-        'No AI model selection',
-        'No document processing',
-      ],
-      buttonText: 'Current Plan',
-      popular: false,
+      icon: Key,
+      title: 'Your API Keys, Your Control',
+      description: 'Use your own API keys from OpenAI, Gemini, Grok, or Claude. No subscription fees, no middleman.',
+      color: 'from-blue-500 to-cyan-500',
     },
     {
-      id: 'pro' as SubscriptionPlan,
-      name: 'Pro',
-      price: 15,
-      tokens: 100000,
+      icon: DollarSign,
+      title: 'Pay Only What You Use',
+      description: 'Pay directly to AI providers based on actual token usage. Transparent pricing, no markup.',
+      color: 'from-green-500 to-emerald-500',
+    },
+    {
+      icon: Shield,
+      title: 'Privacy First',
+      description: 'Your API keys are encrypted and stored locally. We never see or store your keys on our servers.',
+      color: 'from-purple-500 to-pink-500',
+    },
+    {
       icon: Zap,
-      description: 'Great for individuals and small teams',
-      features: [
-        '100,000 Transor tokens/month',
-        'All AI models (OpenAI, Gemini, Grok, Claude)',
-        'Unlimited document uploads',
-        'Bilingual view',
-        'Export to DOCX/PDF',
-        'Priority support',
-        'Advanced formatting',
-        'Glossary management',
-      ],
-      buttonText: 'Upgrade to Pro',
-      popular: true,
-    },
-    {
-      id: 'enterprise' as SubscriptionPlan,
-      name: 'Enterprise',
-      price: 45,
-      tokens: 1000000,
-      icon: Crown,
-      description: 'For power users and teams',
-      features: [
-        '1,000,000 Transor tokens/month',
-        'All AI models (OpenAI, Gemini, Grok, Claude)',
-        'Unlimited everything',
-        'Dedicated account manager',
-        'Custom AI training',
-        'API access',
-        'Advanced analytics',
-        'Team collaboration',
-        'SLA guarantee',
-        '24/7 premium support',
-      ],
-      buttonText: 'Upgrade to Enterprise',
-      popular: false,
+      title: 'Unlimited Usage',
+      description: 'No token limits, no monthly caps. Translate as much as you want with your own API keys.',
+      color: 'from-orange-500 to-red-500',
     },
   ];
 
-  const handleSelectPlan = async (planId: SubscriptionPlan) => {
-    if (!isAuthenticated) {
-      toast.error('Please log in first');
-      navigate('/login');
-      return;
-    }
-
-    if (user?.subscriptionPlan === planId) {
-      toast.info('You are already on this plan');
-      return;
-    }
-
-    if (planId === 'free') {
-      toast.info('You can downgrade at any time from settings');
-      return;
-    }
-
-    try {
-      await updateSubscription(planId);
-      toast.success(`Successfully upgraded to ${planId === 'pro' ? 'Pro' : 'Enterprise'}!`);
-      navigate('/');
-    } catch (error) {
-      toast.error('Failed to update subscription');
-    }
-  };
+  const providers = [
+    {
+      name: 'OpenAI',
+      models: 'GPT-4, GPT-3.5 Turbo',
+      pricing: '~$0.03/1K tokens',
+      color: 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
+    },
+    {
+      name: 'Google Gemini',
+      models: 'Gemini Pro',
+      pricing: '~$0.00125/1K tokens',
+      color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
+    },
+    {
+      name: 'xAI Grok',
+      models: 'Grok-1',
+      pricing: 'Coming soon',
+      color: 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400',
+    },
+    {
+      name: 'Anthropic Claude',
+      models: 'Claude 3 Opus, Sonnet',
+      pricing: '~$0.015/1K tokens',
+      color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400',
+    },
+  ];
 
   return (
-    <div className="max-w-7xl mx-auto">
-      {/* Header */}
+    <div className="max-w-6xl mx-auto">
+      {/* Hero Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-12"
       >
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          Choose Your Plan
+        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+          Free to Use. Forever.
         </h1>
-        <p className="text-xl text-gray-600 mb-2">
-          Pay only for the tokens you use
+        <p className="text-xl text-gray-600 dark:text-gray-400 mb-2">
+          Transor is 100% free. You only pay for the AI tokens you use.
         </p>
-        <p className="text-sm text-gray-500">
-          All paid plans renew monthly. Cancel anytime.
+        <p className="text-sm text-gray-500 dark:text-gray-500">
+          No subscriptions, no hidden fees, no markup.
         </p>
       </motion.div>
 
-      {/* Pricing Cards */}
-      <div className="grid md:grid-cols-3 gap-6 mb-12">
-        {pricingTiers.map((tier, index) => {
-          const Icon = tier.icon;
-          const isCurrentPlan = user?.subscriptionPlan === tier.id;
-          
+      {/* Features Grid */}
+      <div className="grid md:grid-cols-2 gap-6 mb-12">
+        {features.map((feature, index) => {
+          const Icon = feature.icon;
           return (
             <motion.div
-              key={tier.id}
+              key={index}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className={`relative card ${tier.popular ? 'ring-2 ring-blue-500' : ''}`}
+              className="card group hover:shadow-lg transition-shadow"
             >
-              {/* Popular Badge */}
-              {tier.popular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <span className="inline-flex items-center px-3 py-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xs font-medium rounded-full">
-                    Most Popular
-                  </span>
-                </div>
-              )}
-
-              {/* Header */}
-              <div className="text-center mb-6">
-                <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg mb-4 ${
-                  tier.id === 'free' ? 'bg-gray-100' :
-                  tier.id === 'pro' ? 'bg-blue-100' :
-                  'bg-purple-100'
-                }`}>
-                  <Icon className={`w-6 h-6 ${
-                    tier.id === 'free' ? 'text-gray-600' :
-                    tier.id === 'pro' ? 'text-blue-600' :
-                    'text-purple-600'
-                  }`} />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">{tier.name}</h3>
-                <p className="text-sm text-gray-600 mb-4">{tier.description}</p>
-                
-                {/* Price */}
-                <div className="mb-4">
-                  <span className="text-4xl font-bold text-gray-900">${tier.price}</span>
-                  {tier.price > 0 && <span className="text-gray-600">/month</span>}
-                </div>
-                
-                {/* Tokens */}
-                {tier.tokens > 0 && (
-                  <div className="text-sm text-gray-600">
-                    {tier.tokens.toLocaleString()} tokens/month
-                  </div>
-                )}
+              <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${feature.color} flex items-center justify-center mb-4`}>
+                <Icon className="w-6 h-6 text-white" />
               </div>
-
-              {/* Features */}
-              <div className="space-y-3 mb-6">
-                {tier.features.map((feature, i) => (
-                  <div key={i} className="flex items-start space-x-2">
-                    <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-700">{feature}</span>
-                  </div>
-                ))}
-                {tier.limitations && tier.limitations.map((limitation, i) => (
-                  <div key={i} className="flex items-start space-x-2">
-                    <svg className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                    <span className="text-sm text-gray-500">{limitation}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* CTA Button */}
-              <button
-                onClick={() => handleSelectPlan(tier.id)}
-                disabled={isCurrentPlan}
-                className={`w-full py-2 px-4 rounded font-medium transition-all ${
-                  isCurrentPlan
-                    ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
-                    : tier.popular
-                    ? 'btn-primary'
-                    : 'btn-outline'
-                }`}
-              >
-                {isCurrentPlan ? 'Current Plan' : tier.buttonText}
-              </button>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                {feature.title}
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
+                {feature.description}
+              </p>
             </motion.div>
           );
         })}
       </div>
 
-      {/* FAQ Section */}
+      {/* Pricing Comparison */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        className="card"
+        className="card mb-12"
       >
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Frequently Asked Questions</h2>
-        <div className="space-y-4">
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-2">What is a Transor token?</h3>
-            <p className="text-gray-600 text-sm">
-              Transor tokens are our unified currency for all AI translation services. 
-              1 Transor token ≈ 1 AI model token. The actual consumption depends on the model you choose.
-            </p>
-          </div>
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-2">Can I change my plan anytime?</h3>
-            <p className="text-gray-600 text-sm">
-              Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately.
-            </p>
-          </div>
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-2">What happens if I run out of tokens?</h3>
-            <p className="text-gray-600 text-sm">
-              You can upgrade your plan or purchase additional token bundles. We'll notify you when you're running low.
-            </p>
-          </div>
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-2">Which AI models are supported?</h3>
-            <p className="text-gray-600 text-sm">
-              All paid plans include access to OpenAI GPT-4, Google Gemini, Grok, and Anthropic Claude. You can switch between models at any time.
-            </p>
-          </div>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 text-center">
+          Transparent AI Provider Pricing
+        </h2>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {providers.map((provider, index) => (
+            <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+              <div className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium mb-3 ${provider.color}`}>
+                {provider.name}
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                {provider.models}
+              </p>
+              <p className="text-lg font-bold text-gray-900 dark:text-white">
+                {provider.pricing}
+              </p>
+            </div>
+          ))}
         </div>
+        <p className="text-xs text-gray-500 dark:text-gray-500 text-center mt-4">
+          * Pricing is approximate and set by each AI provider. Check their official sites for exact rates.
+        </p>
+      </motion.div>
+
+      {/* CTA */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+        className="text-center"
+      >
+        <button
+          onClick={() => navigate(isAuthenticated ? '/settings' : '/signup')}
+          className="btn-primary inline-flex items-center space-x-2 px-8 py-3 text-lg"
+        >
+          <span>{isAuthenticated ? 'Add Your API Keys' : 'Get Started Free'}</span>
+          <ArrowRight className="w-5 h-5" />
+        </button>
+        <p className="text-sm text-gray-500 dark:text-gray-500 mt-4">
+          No credit card required. Start translating in minutes.
+        </p>
       </motion.div>
     </div>
   );
 };
 
 export default PricingPage;
-
