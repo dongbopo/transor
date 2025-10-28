@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, AuthState, APIKeys, LLMProvider, LicenseStatus } from '../types';
+import { supabaseAuth, supabaseDB } from '../lib/supabase';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<void>;
@@ -49,114 +51,210 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     isLoading: true,
   });
 
+  // Map Supabase user to our User type
+  const mapSupabaseUserToUser = async (supabaseUser: SupabaseUser): Promise<User> => {
+    // Get user profile from database
+    const { data: profile } = await supabaseDB.getProfile(supabaseUser.id);
+    
+    return {
+      id: supabaseUser.id,
+      email: supabaseUser.email || '',
+      name: profile?.full_name || supabaseUser.user_metadata?.full_name || '',
+      avatar: profile?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${supabaseUser.email}`,
+      apiKeys: {},
+      preferences: {
+        defaultProvider: 'openai',
+        theme: 'system',
+        language: 'en',
+        defaultReadingMode: 'parallel',
+        fontSize: 16,
+        lineHeight: 1.6,
+      },
+      licenseStatus: (profile?.license_status as LicenseStatus) || 'trial',
+      licenseKey: profile?.license_key,
+      storage: {
+        totalGB: profile?.storage_total_gb || 5,
+        usedGB: profile?.storage_used_gb || 0,
+        availableGB: (profile?.storage_total_gb || 5) - (profile?.storage_used_gb || 0),
+        usagePercentage: ((profile?.storage_used_gb || 0) / (profile?.storage_total_gb || 5)) * 100,
+        documentsCount: 0,
+      },
+      storagePurchases: [],
+      createdAt: new Date(profile?.created_at || supabaseUser.created_at),
+      lastLogin: new Date(),
+    };
+  };
+
   useEffect(() => {
-    // Check for stored user session
-    const storedUser = localStorage.getItem('transor_user_v2');
-    if (storedUser) {
+    // Check for existing session
+    const checkSession = async () => {
       try {
-        const user = JSON.parse(storedUser);
+        const { data: { session } } = await supabaseAuth.getSession();
+        
+        if (session?.user) {
+          const user = await mapSupabaseUserToUser(session.user);
+          setState({
+            user,
+            isAuthenticated: true,
+            isLoading: false,
+          });
+        } else {
+          setState(prev => ({ ...prev, isLoading: false }));
+        }
+      } catch (error) {
+        console.error('Session check error:', error);
+        setState(prev => ({ ...prev, isLoading: false }));
+      }
+    };
+
+    checkSession();
+
+    // Listen to auth state changes
+    const { data: { subscription } } = supabaseAuth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        const user = await mapSupabaseUserToUser(session.user);
         setState({
           user,
           isAuthenticated: true,
           isLoading: false,
         });
-      } catch {
-        setState(prev => ({ ...prev, isLoading: false }));
+      } else {
+        setState({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+        });
       }
-    } else {
-      setState(prev => ({ ...prev, isLoading: false }));
-    }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
     setState(prev => ({ ...prev, isLoading: true }));
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    // Check if user exists
-    const existingUsers = JSON.parse(localStorage.getItem('transor_users_v2') || '[]');
-    let user = existingUsers.find((u: User) => u.email === email);
-    
-    if (!user) {
-      user = createDefaultUser(email);
-      existingUsers.push(user);
-      localStorage.setItem('transor_users_v2', JSON.stringify(existingUsers));
+    try {
+      const { data, error } = await supabaseAuth.signIn(email, password);
+      
+      if (error) {
+        throw error;
+      }
+      
+      if (data.user) {
+        const user = await mapSupabaseUserToUser(data.user);
+        setState({
+          user,
+          isAuthenticated: true,
+          isLoading: false,
+        });
+      }
+    } catch (error: any) {
+      console.error('Login error:', error);
+      setState(prev => ({ ...prev, isLoading: false }));
+      throw new Error(error.message || 'Login failed');
     }
-    
-    user.lastLogin = new Date();
-    localStorage.setItem('transor_user_v2', JSON.stringify(user));
-    setState({
-      user,
-      isAuthenticated: true,
-      isLoading: false,
-    });
   };
 
   const signup = async (email: string, password: string, name?: string) => {
     setState(prev => ({ ...prev, isLoading: true }));
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    const user = createDefaultUser(email, name);
-    
-    // Store in users list
-    const existingUsers = JSON.parse(localStorage.getItem('transor_users_v2') || '[]');
-    existingUsers.push(user);
-    localStorage.setItem('transor_users_v2', JSON.stringify(existingUsers));
-    
-    localStorage.setItem('transor_user_v2', JSON.stringify(user));
-    setState({
-      user,
-      isAuthenticated: true,
-      isLoading: false,
-    });
+    try {
+      const { data, error } = await supabaseAuth.signUp(email, password, name || '');
+      
+      if (error) {
+        throw error;
+      }
+      
+      if (data.user) {
+        // User created successfully
+        // Supabase will send confirmation email if enabled
+        // For now, we'll just auto-login
+        const user = await mapSupabaseUserToUser(data.user);
+        setState({
+          user,
+          isAuthenticated: true,
+          isLoading: false,
+        });
+      }
+    } catch (error: any) {
+      console.error('Signup error:', error);
+      setState(prev => ({ ...prev, isLoading: false }));
+      throw new Error(error.message || 'Signup failed');
+    }
   };
 
-  const logout = () => {
-    localStorage.removeItem('transor_user_v2');
-    setState({
-      user: null,
-      isAuthenticated: false,
-      isLoading: false,
-    });
+  const logout = async () => {
+    try {
+      await supabaseAuth.signOut();
+      setState({
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
-  const updateAPIKeys = (keys: Partial<APIKeys>) => {
+  const updateAPIKeys = async (keys: Partial<APIKeys>) => {
     if (!state.user) return;
 
-    const updatedUser: User = {
-      ...state.user,
-      apiKeys: {
-        ...state.user.apiKeys,
-        ...keys,
-      },
-    };
+    try {
+      // Save to Supabase database
+      for (const [provider, apiKey] of Object.entries(keys)) {
+        if (apiKey) {
+          await supabaseDB.saveAPIKey(state.user.id, provider, apiKey);
+        }
+      }
 
-    localStorage.setItem('transor_user_v2', JSON.stringify(updatedUser));
-    setState(prev => ({
-      ...prev,
-      user: updatedUser,
-    }));
+      // Update local state
+      const updatedUser: User = {
+        ...state.user,
+        apiKeys: {
+          ...state.user.apiKeys,
+          ...keys,
+        },
+      };
+
+      setState(prev => ({
+        ...prev,
+        user: updatedUser,
+      }));
+    } catch (error) {
+      console.error('Error saving API keys:', error);
+    }
   };
 
-  const updatePreferences = (prefs: Partial<User['preferences']>) => {
+  const updatePreferences = async (prefs: Partial<User['preferences']>) => {
     if (!state.user) return;
 
-    const updatedUser: User = {
-      ...state.user,
-      preferences: {
-        ...state.user.preferences,
-        ...prefs,
-      },
-    };
+    try {
+      // Update in Supabase
+      await supabaseDB.updateProfile(state.user.id, {
+        preferences: {
+          ...state.user.preferences,
+          ...prefs,
+        },
+      });
 
-    localStorage.setItem('transor_user_v2', JSON.stringify(updatedUser));
-    setState(prev => ({
-      ...prev,
-      user: updatedUser,
-    }));
+      // Update local state
+      const updatedUser: User = {
+        ...state.user,
+        preferences: {
+          ...state.user.preferences,
+          ...prefs,
+        },
+      };
+
+      setState(prev => ({
+        ...prev,
+        user: updatedUser,
+      }));
+    } catch (error) {
+      console.error('Error updating preferences:', error);
+    }
   };
 
   const hasAPIKey = (provider: LLMProvider): boolean => {
