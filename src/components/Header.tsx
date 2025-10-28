@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { Languages, Share2, Sparkles, Bell, MoreVertical, Menu, Moon, Sun } from 'lucide-react';
+import { Languages, Menu, Moon, Sun } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface HeaderProps {
@@ -60,15 +60,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
         )}
       </div>
 
-      <div className="flex items-center space-x-1 md:space-x-2">
-        <button className="hidden md:flex items-center space-x-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors">
-          <Share2 className="w-4 h-4" />
-          <span>Share</span>
-        </button>
-        <button className="flex items-center space-x-2 px-2 md:px-3 py-1.5 text-xs md:text-sm bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:opacity-90 rounded transition-opacity">
-          <Sparkles className="w-4 h-4" />
-          <span className="hidden sm:inline">AI Translate</span>
-        </button>
+      <div className="flex items-center space-x-2">
         <button 
           onClick={toggleTheme}
           className="p-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
@@ -79,13 +71,6 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
           ) : (
             <Moon className="w-4 h-4" />
           )}
-        </button>
-        <button className="p-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded relative transition-colors">
-          <Bell className="w-4 h-4" />
-          <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-        </button>
-        <button className="p-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors">
-          <MoreVertical className="w-4 h-4" />
         </button>
       </div>
     </header>
