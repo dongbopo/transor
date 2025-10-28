@@ -1,60 +1,77 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   html {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Golden ratio line height */
+    line-height: 1.618;
   }
   
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply bg-gray-50 text-gray-900 transition-colors duration-300;
+  }
+  
+  /* Enhanced Dark Mode - Deeper blacks */
+  .dark body {
+    @apply bg-dark-bg text-dark-text;
+  }
+  
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-gradient-to-r from-blue-500 to-purple-600 hover:opacity-90 text-white font-medium py-2 px-4 rounded transition-opacity duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+    @apply bg-gradient-to-r from-blue-500 to-purple-600 hover:opacity-90 text-white font-medium py-golden-sm px-golden-md rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:ring-offset-dark-bg shadow-sm hover:shadow-md;
   }
   
   .btn-secondary {
-    @apply bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
+    @apply bg-gray-200 dark:bg-dark-card hover:bg-gray-300 dark:hover:bg-dark-hover text-gray-800 dark:text-dark-text font-medium py-golden-sm px-golden-md rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:ring-offset-dark-bg;
   }
   
   .btn-outline {
-    @apply border border-gray-300 hover:border-gray-400 bg-white hover:bg-gray-50 text-gray-700 font-medium py-2 px-4 rounded transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+    @apply border border-gray-300 dark:border-dark-border hover:border-gray-400 dark:hover:border-gray-600 bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-dark-hover text-gray-700 dark:text-dark-text font-medium py-golden-sm px-golden-md rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:ring-offset-dark-bg;
   }
   
+  .input,
   .input-field {
-    @apply w-full px-3 py-2 text-sm bg-gray-100 border-0 rounded focus:outline-none focus:ring-2 focus:ring-blue-500;
+    @apply w-full px-golden-sm py-golden-sm text-sm bg-gray-100 dark:bg-dark-card border border-transparent dark:border-dark-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all duration-200 text-gray-900 dark:text-dark-text placeholder-gray-500 dark:placeholder-dark-text-muted;
   }
   
   .card {
-    @apply bg-white rounded-lg border border-gray-200 p-6;
+    @apply bg-white dark:bg-dark-card rounded-xl border border-gray-200 dark:border-dark-border p-golden-lg shadow-sm transition-colors duration-300;
   }
   
   .tooltip {
-    @apply absolute z-50 px-3 py-2 text-sm text-white bg-gray-900 rounded-lg shadow-lg pointer-events-none;
+    @apply absolute z-50 px-golden-sm py-golden-xs text-golden-sm text-white bg-gray-900 dark:bg-dark-bg rounded-lg shadow-lg pointer-events-none;
   }
   
   .dropzone {
-    @apply border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors duration-200 cursor-pointer;
+    @apply border-2 border-dashed border-gray-300 dark:border-dark-border rounded-xl p-golden-xl text-center hover:border-gray-400 dark:hover:border-gray-600 transition-colors duration-200 cursor-pointer bg-gray-50 dark:bg-dark-card;
   }
   
   .dropzone-active {
-    @apply border-primary-500 bg-primary-50;
+    @apply border-primary-500 bg-primary-50 dark:bg-blue-900/20;
   }
   
   .nav-link {
-    @apply flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors;
+    @apply flex items-center space-x-golden-sm px-golden-sm py-golden-sm text-golden-sm text-gray-700 dark:text-dark-text-muted hover:bg-gray-100 dark:hover:bg-dark-hover rounded-lg transition-colors;
   }
   
   .nav-link-active {
-    @apply flex items-center space-x-3 px-3 py-2 text-sm bg-blue-50 text-blue-600 rounded;
+    @apply flex items-center space-x-golden-sm px-golden-sm py-golden-sm text-golden-sm bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg font-medium;
   }
   
   .stat-card {
-    @apply bg-white border border-gray-200 rounded-lg p-4;
+    @apply bg-white dark:bg-dark-card border border-gray-200 dark:border-dark-border rounded-xl p-golden-md transition-colors duration-300 hover:shadow-md;
   }
 }
 
@@ -71,6 +88,10 @@
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
   
+  .text-shadow-dark {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  }
+  
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -78,6 +99,25 @@
   
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+  
+  /* Custom scrollbar for dark mode */
+  .dark .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .dark .scrollbar-thin::-webkit-scrollbar-track {
+    background: theme('colors.dark.card');
+  }
+  
+  .dark .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: theme('colors.dark.border');
+    border-radius: 4px;
+  }
+  
+  .dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: theme('colors.gray.600');
   }
 }
 

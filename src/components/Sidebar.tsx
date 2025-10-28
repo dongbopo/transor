@@ -33,26 +33,26 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       {/* Sidebar */}
       <div className={`
         fixed lg:static inset-y-0 left-0 z-50
-        w-60 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col h-screen
+        w-60 bg-white dark:bg-dark-card border-r border-gray-200 dark:border-dark-border flex flex-col h-screen
         transform transition-all duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
         {/* Header */}
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="p-4 border-b border-gray-200 dark:border-dark-border">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded flex items-center justify-center text-white font-bold text-sm">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded flex items-center justify-center text-white font-bold text-sm shadow-sm">
                 T
               </div>
-              <span className="font-semibold text-sm truncate text-gray-900 dark:text-white">Transor</span>
+              <span className="font-semibold text-sm truncate text-gray-900 dark:text-dark-text">Transor</span>
             </div>
             <div className="flex items-center space-x-1">
-              <button className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hidden lg:block transition-colors">
+              <button className="text-gray-400 dark:text-dark-text-muted hover:text-gray-600 dark:hover:text-dark-text hidden lg:block transition-colors">
                 <MoreHorizontal className="w-4 h-4" />
               </button>
               <button 
                 onClick={onClose}
-                className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 lg:hidden p-1 transition-colors"
+                className="text-gray-400 dark:text-dark-text-muted hover:text-gray-600 dark:hover:text-dark-text lg:hidden p-1 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -61,13 +61,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400 dark:text-gray-500" />
+            <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400 dark:text-dark-text-muted" />
             <input
               type="text"
               placeholder="Search..."
-              className="w-full pl-9 pr-8 py-2 text-sm bg-gray-100 dark:bg-gray-700 dark:text-white border-0 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"
+              className="w-full pl-9 pr-8 py-2 text-sm bg-gray-100 dark:bg-dark-bg dark:text-dark-text dark:placeholder-dark-text-muted border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"
             />
-            <span className="absolute right-3 top-2.5 text-xs text-gray-400 dark:text-gray-500">/</span>
+            <span className="absolute right-3 top-2.5 text-xs text-gray-400 dark:text-dark-text-muted">/</span>
           </div>
         </div>
 
@@ -84,10 +84,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   to={item.path}
                   onClick={() => onClose()}
                   className={`
-                    flex items-center space-x-3 px-3 py-2 text-sm rounded transition-colors
+                    flex items-center space-x-3 px-3 py-2 text-sm rounded-lg transition-colors
                     ${isActive 
-                      ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' 
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium' 
+                      : 'text-gray-700 dark:text-dark-text-muted hover:bg-gray-100 dark:hover:bg-dark-hover'
                     }
                   `}
                 >
