@@ -194,3 +194,12 @@ export const DocumentProvider: React.FC<DocumentProviderProps> = ({ children }) 
     </DocumentContext.Provider>
   );
 };
+
+// Custom hook for accessing the DocumentContext
+export const useDocuments = () => {
+  const context = useContext(DocumentContext);
+  if (!context) {
+    throw new Error('useDocuments must be used within a DocumentProvider');
+  }
+  return context;
+};

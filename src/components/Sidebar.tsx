@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, Inbox, Settings, Upload, Plus, MoreHorizontal, LogOut, User, X } from 'lucide-react';
+import { Search, Inbox, Settings, Upload, Plus, MoreHorizontal, LogOut, User, X, Library, HardDrive } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 interface SidebarProps {
@@ -14,7 +14,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
   const navItems = [
     { path: '/', label: 'Upload', icon: Upload },
+    { path: '/library', label: 'Library', icon: Library },
     { path: '/jobs', label: 'My Tasks', icon: Inbox, badge: 0 },
+    { path: '/storage', label: 'Storage', icon: HardDrive },
     { path: '/settings', label: 'Settings', icon: Settings },
   ];
 

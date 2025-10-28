@@ -253,14 +253,44 @@ export interface UserPreferences {
   defaultProvider: LLMProvider;
   theme: 'light' | 'dark' | 'system';
   language: string;
+  defaultReadingMode: 'original' | 'translation' | 'parallel';
+  fontSize: number;
+  lineHeight: number;
 }
+
+// Storage Management
+export interface StorageInfo {
+  totalGB: number;
+  usedGB: number;
+  availableGB: number;
+  usagePercentage: number;
+  documentsCount: number;
+}
+
+export interface StoragePurchase {
+  id: string;
+  amountGB: number;
+  pricePaid: number;
+  purchasedAt: Date;
+}
+
+// License & Subscription
+export type LicenseStatus = 'trial' | 'active' | 'expired';
 
 export interface User {
   id: string;
   email: string;
   name?: string;
+  avatar?: string;
   apiKeys: APIKeys;
   preferences: UserPreferences;
+  
+  // License & Storage
+  licenseStatus: LicenseStatus;
+  licenseKey?: string;
+  storage: StorageInfo;
+  storagePurchases: StoragePurchase[];
+  
   createdAt: Date;
   lastLogin: Date;
 }
@@ -269,6 +299,74 @@ export interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+}
+
+// Document Tags
+export interface DocumentTag {
+  id: string;
+  name: string;
+  color: string;
+  documentCount?: number;
+  createdAt: Date;
+}
+
+// Translation Comparison
+export interface TranslationResult {
+  model: LLMProvider;
+  modelVersion: string;
+  text: string;
+  timeTaken: number;
+  wordCount: number;
+  isSelected?: boolean;
+}
+
+export interface TranslationComparison {
+  documentId: string;
+  samplePage: number;
+  originalText: string;
+  translations: TranslationResult[];
+  selectedModel?: LLMProvider;
+}
+
+// Reading Progress
+export type ReadingMode = 'original' | 'translation' | 'parallel';
+
+export interface ReadingProgress {
+  documentId: string;
+  currentPage: number;
+  totalPages: number;
+  progressPercentage: number;
+  lastReadingMode: ReadingMode;
+  totalReadingTimeMinutes: number;
+  lastReadAt: Date;
+}
+
+export interface Bookmark {
+  id: string;
+  documentId: string;
+  pageNumber: number;
+  note?: string;
+  createdAt: Date;
+}
+
+export interface Highlight {
+  id: string;
+  documentId: string;
+  pageNumber: number;
+  text: string;
+  color: string;
+  createdAt: Date;
+}
+
+// Enhanced Document Metadata
+export interface DocumentMetadata {
+  coverImageUrl?: string;
+  author?: string;
+  description?: string;
+  tags: DocumentTag[];
+  fileSize: number;
+  totalPages: number;
+  lastAccessed: Date;
 }
 
 export interface TokenUsage {

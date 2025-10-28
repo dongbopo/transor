@@ -5,11 +5,14 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import HomePage from './pages/HomePage';
 import ReaderPage from './pages/ReaderPage';
+import ReaderPageV2 from './pages/ReaderPageV2';
 import JobsPage from './pages/JobsPage';
 import SettingsPage from './pages/SettingsPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import PricingPage from './pages/PricingPage';
+import StoragePage from './pages/StoragePage';
+import LibraryPage from './pages/LibraryPage';
 import { DocumentProvider } from './contexts/DocumentContext';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { AuthProvider } from './contexts/AuthContext';
@@ -47,8 +50,10 @@ const App: React.FC = () => {
             <AppLayout>
             <Routes>
               <Route path="/" element={<HomePage />} />
-              <Route path="/reader/:documentId" element={<ReaderPage />} />
+              <Route path="/library" element={<LibraryPage />} />
+              <Route path="/reader/:id" element={<ReaderPageV2 />} />
               <Route path="/jobs" element={<JobsPage />} />
+              <Route path="/storage" element={<StoragePage />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/pricing" element={<PricingPage />} />
               <Route path="/login" element={<LoginPage />} />
