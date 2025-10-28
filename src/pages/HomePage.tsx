@@ -166,41 +166,6 @@ const HomePage: React.FC = () => {
         </motion.div>
       )}
 
-      {/* Configuration Section - Domain & Language */}
-      <div className="grid md:grid-cols-2 gap-4 mb-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-          className="card"
-        >
-          <div className="flex items-center space-x-2 mb-3">
-            <Globe className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Target Language</h3>
-          </div>
-          <LanguageSelector
-            value={targetLanguage}
-            onChange={setTargetLanguage}
-          />
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-          className="card"
-        >
-          <div className="flex items-center space-x-2 mb-3">
-            <Zap className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Domain</h3>
-          </div>
-          <DomainSelector
-            value={domain}
-            onChange={setDomain}
-          />
-        </motion.div>
-      </div>
-
       {/* Main Upload Area */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -275,6 +240,23 @@ const HomePage: React.FC = () => {
         </button>
       </motion.div>
 
+      {/* Target Language */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.25 }}
+        className="card mb-6"
+      >
+        <div className="flex items-center space-x-2 mb-3">
+          <Globe className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Target Language</h3>
+        </div>
+        <LanguageSelector
+          value={targetLanguage}
+          onChange={setTargetLanguage}
+        />
+      </motion.div>
+
       {/* LLM Provider Selector */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -286,6 +268,23 @@ const HomePage: React.FC = () => {
           value={llmProvider}
           onChange={setLlmProvider}
           disabled={!isAuthenticated}
+        />
+      </motion.div>
+
+      {/* Domain */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.35 }}
+        className="card mb-6"
+      >
+        <div className="flex items-center space-x-2 mb-3">
+          <Zap className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Domain</h3>
+        </div>
+        <DomainSelector
+          value={domain}
+          onChange={setDomain}
         />
       </motion.div>
 
