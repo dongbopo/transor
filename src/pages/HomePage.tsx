@@ -166,6 +166,41 @@ const HomePage: React.FC = () => {
         </motion.div>
       )}
 
+      {/* Configuration Section - Domain & Language */}
+      <div className="grid md:grid-cols-2 gap-4 mb-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="card"
+        >
+          <div className="flex items-center space-x-2 mb-3">
+            <Globe className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Target Language</h3>
+          </div>
+          <LanguageSelector
+            value={targetLanguage}
+            onChange={setTargetLanguage}
+          />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="card"
+        >
+          <div className="flex items-center space-x-2 mb-3">
+            <Zap className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Domain</h3>
+          </div>
+          <DomainSelector
+            value={domain}
+            onChange={setDomain}
+          />
+        </motion.div>
+      </div>
+
       {/* Main Upload Area */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -240,79 +275,19 @@ const HomePage: React.FC = () => {
         </button>
       </motion.div>
 
-      {/* Configuration Section */}
-      <div className="grid lg:grid-cols-3 gap-4 mb-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="lg:col-span-2 space-y-4"
-        >
-          {/* LLM Provider Selector */}
-          <div className="card">
-            <LLMProviderSelector
-              value={llmProvider}
-              onChange={setLlmProvider}
-              disabled={!isAuthenticated}
-            />
-          </div>
-
-          {/* Language & Domain */}
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div className="card">
-              <div className="flex items-center space-x-2 mb-3">
-                <Globe className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Target Language</h3>
-              </div>
-              <LanguageSelector
-                value={targetLanguage}
-                onChange={setTargetLanguage}
-              />
-            </div>
-
-            <div className="card">
-              <div className="flex items-center space-x-2 mb-3">
-                <Zap className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Domain</h3>
-              </div>
-              <DomainSelector
-                value={domain}
-                onChange={setDomain}
-              />
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Quick Actions */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="card"
-        >
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Quick Actions</h3>
-          <div className="space-y-2">
-            <button
-              onClick={() => navigate('/jobs')}
-              className="w-full btn-outline text-left"
-            >
-              View All Tasks
-            </button>
-            <button
-              onClick={() => navigate('/settings')}
-              className="w-full btn-outline text-left"
-            >
-              Manage API Keys
-            </button>
-            <button
-              onClick={() => navigate('/pricing')}
-              className="w-full btn-outline text-left"
-            >
-              Pricing Info
-            </button>
-          </div>
-        </motion.div>
-      </div>
+      {/* LLM Provider Selector */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="card mb-6"
+      >
+        <LLMProviderSelector
+          value={llmProvider}
+          onChange={setLlmProvider}
+          disabled={!isAuthenticated}
+        />
+      </motion.div>
 
       {/* Supported Formats */}
       <motion.div
