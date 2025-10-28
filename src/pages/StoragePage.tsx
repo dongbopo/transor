@@ -26,7 +26,7 @@ const StoragePage: React.FC = () => {
       <div className="flex items-start justify-start gap-6">
         {/* Settings Navigation Sidebar */}
         <nav
-          className="flex-shrink-0 w-[220px] bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-2"
+          className="flex-shrink-0 w-[220px] bg-white dark:bg-[#111113] rounded-lg border border-gray-200 dark:border-[#27272a] p-2"
           aria-label="Settings navigation"
         >
           <div className="space-y-1">
@@ -42,7 +42,7 @@ const StoragePage: React.FC = () => {
                     w-full flex items-center space-x-3 px-3 py-2.5 text-sm rounded-lg transition-colors
                     ${isActive
                       ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      : 'text-gray-700 dark:text-[#a1a1aa] hover:bg-gray-100 dark:hover:bg-[#1a1a1d]'
                     }
                   `}
                 >
@@ -104,10 +104,10 @@ const StoragePage: React.FC = () => {
                   `} />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-[#fafafa]">
                     License Status
                   </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm text-gray-600 dark:text-[#a1a1aa]">
                     {user.licenseStatus === 'active' ? (
                       <>
                         <span className="text-green-600 dark:text-green-400 font-medium">Active</span>
