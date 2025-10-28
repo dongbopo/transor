@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transor - Hướng Dẫn Setup Supabase Tự Động</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .step {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .step.completed {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            font-size: 18px;
+            margin-right: 15px;
+        }
+        
+        .step.completed .step-number {
+            background: #28a745;
+        }
+        
+        .step-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+        
+        .step-description {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .sql-box {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 20px 0;
+            max-height: 300px;
+            position: relative;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 8px 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .copy-btn:hover {
+            background: #5568d3;
+        }
+        
+        .copy-btn.copied {
+            background: #28a745;
+        }
+        
+        .checklist {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #667eea;
+        }
+        
+        .checklist-item {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .checklist-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .checklist-item:last-child {
+            border-bottom: none;
+        }
+        
+        .checklist-item input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+            margin-right: 15px;
+            cursor: pointer;
+        }
+        
+        .checklist-item.checked {
+            background: #d4edda;
+            text-decoration: line-through;
+            color: #666;
+        }
+        
+        .alert {
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .alert-info {
+            background: #d1ecf1;
+            border: 2px solid #bee5eb;
+            color: #0c5460;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            border: 2px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .alert-warning {
+            background: #fff3cd;
+            border: 2px solid #ffeaa7;
+            color: #856404;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .icon {
+            font-size: 24px;
+        }
+        
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .screenshot {
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Transor Setup Wizard</h1>
+            <p>Chỉ cần 3 bước đơn giản để app hoạt động!</p>
+        </div>
+        
+        <div class="content">
+            <!-- Progress Bar -->
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar">0%</div>
+            </div>
+            
+            <div class="alert alert-info">
+                <strong>📝 Lưu ý:</strong> Bạn chỉ cần click các nút bên dưới và làm theo hướng dẫn. Mỗi bước chỉ mất 1-2 phút!
+            </div>
+            
+            <!-- Step 1: Setup Database -->
+            <div class="step" id="step1">
+                <div class="step-title">
+                    <span class="step-number">1</span>
+                    <span>Tạo Database Tables</span>
+                </div>
+                <div class="step-description">
+                    Bạn cần chạy SQL script để tạo các bảng trong database. Đừng lo, chỉ cần copy và paste!
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="copySQL()">
+                        <span class="icon">📋</span>
+                        Bước 1: Copy SQL Script
+                    </button>
+                    <a href="https://supabase.com/dashboard/project/zwnlxsqptrtksqwjagui/sql/new" target="_blank" class="btn btn-primary">
+                        <span class="icon">🔗</span>
+                        Bước 2: Mở SQL Editor
+                    </a>
+                    <button class="btn btn-success" onclick="markStepComplete(1)">
+                        <span class="icon">✅</span>
+                        Đã xong!
+                    </button>
+                </div>
+                
+                <div class="alert alert-warning" style="margin-top: 20px;">
+                    <strong>Hướng dẫn chi tiết:</strong><br>
+                    1. Click nút "Copy SQL Script" phía trên<br>
+                    2. Click nút "Mở SQL Editor" (sẽ mở tab mới)<br>
+                    3. Paste (Cmd/Ctrl + V) vào ô SQL<br>
+                    4. Click nút "RUN" hoặc nhấn Cmd/Ctrl + Enter<br>
+                    5. Đợi 5 giây, thấy "Success" → Click "Đã xong!"
+                </div>
+                
+                <div class="sql-box" id="sqlBox">
+                    <button class="copy-btn" onclick="copySQL()">Copy</button>
+                    <pre id="sqlCode">-- Loading SQL script...</pre>
+                </div>
+            </div>
+            
+            <!-- Step 2: Create Storage Bucket -->
+            <div class="step" id="step2">
+                <div class="step-title">
+                    <span class="step-number">2</span>
+                    <span>Tạo Storage Bucket</span>
+                </div>
+                <div class="step-description">
+                    Storage bucket là nơi lưu trữ file PDF, DOCX của bạn. Cực kỳ đơn giản!
+                </div>
+                
+                <div class="action-buttons">
+                    <a href="https://supabase.com/dashboard/project/zwnlxsqptrtksqwjagui/storage/buckets" target="_blank" class="btn btn-primary">
+                        <span class="icon">📁</span>
+                        Mở Storage
+                    </a>
+                    <button class="btn btn-success" onclick="markStepComplete(2)">
+                        <span class="icon">✅</span>
+                        Đã xong!
+                    </button>
+                </div>
+                
+                <div class="alert alert-warning" style="margin-top: 20px;">
+                    <strong>Hướng dẫn chi tiết:</strong><br>
+                    1. Click nút "Mở Storage" phía trên<br>
+                    2. Click nút "Create a new bucket" (xanh lá)<br>
+                    3. Name: Gõ <code>documents</code><br>
+                    4. Public bucket: <strong>BỎ TICK</strong> (để private)<br>
+                    5. Click "Create bucket"<br>
+                    6. Click "Đã xong!" ở đây
+                </div>
+                
+                <div class="checklist">
+                    <h4 style="margin-bottom: 15px;">✅ Checklist:</h4>
+                    <div class="checklist-item" onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <span>Đã mở Storage page</span>
+                    </div>
+                    <div class="checklist-item" onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <span>Đã click "Create a new bucket"</span>
+                    </div>
+                    <div class="checklist-item" onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <span>Đã đặt tên "documents"</span>
+                    </div>
+                    <div class="checklist-item" onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <span>Đã BỎ TICK "Public bucket"</span>
+                    </div>
+                    <div class="checklist-item" onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <span>Đã click "Create bucket"</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 3: Setup Policies -->
+            <div class="step" id="step3">
+                <div class="step-title">
+                    <span class="step-number">3</span>
+                    <span>Setup Storage Policies (Optional)</span>
+                </div>
+                <div class="step-description">
+                    Policies giúp bảo mật file của bạn. Bước này có thể skip nếu bạn muốn test nhanh!
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" onclick="markStepComplete(3)">
+                        <span class="icon">⏭️</span>
+                        Skip (làm sau)
+                    </button>
+                    <button class="btn btn-success" onclick="markStepComplete(3)">
+                        <span class="icon">✅</span>
+                        Đã setup policies
+                    </button>
+                </div>
+                
+                <div class="alert alert-info" style="margin-top: 20px;">
+                    <strong>💡 Lưu ý:</strong> Bạn có thể skip bước này và test app trước. Policies có thể setup sau khi app hoạt động ổn định.
+                </div>
+            </div>
+            
+            <!-- Final Step -->
+            <div class="step" id="stepFinal" style="display: none;">
+                <div class="step-title">
+                    <span class="step-number">🎉</span>
+                    <span>Hoàn thành! Test App Ngay</span>
+                </div>
+                <div class="step-description">
+                    Tuyệt vời! Bạn đã setup xong. Giờ test thử app nhé!
+                </div>
+                
+                <div class="alert alert-success">
+                    <strong>✅ Bạn đã hoàn thành:</strong><br>
+                    ✓ Database tables đã được tạo<br>
+                    ✓ Storage bucket đã sẵn sàng<br>
+                    ✓ App đã kết nối Supabase<br><br>
+                    <strong>🚀 Bước tiếp theo:</strong><br>
+                    1. Mở app: <a href="http://127.0.0.1:5174" target="_blank">http://127.0.0.1:5174</a><br>
+                    2. Click "Sign Up" để tạo tài khoản<br>
+                    3. Đăng nhập và bắt đầu sử dụng!
+                </div>
+                
+                <div class="action-buttons">
+                    <a href="http://127.0.0.1:5174/signup" target="_blank" class="btn btn-primary" style="font-size: 20px; padding: 20px 40px;">
+                        <span class="icon">🚀</span>
+                        Mở App & Test Ngay!
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Load SQL from file
+        fetch('/supabase_schema.sql')
+            .then(response => response.text())
+            .then(sql => {
+                document.getElementById('sqlCode').textContent = sql;
+            })
+            .catch(() => {
+                // Fallback: Load from inline
+                const sql = `-- TRANSOR DATABASE SCHEMA
+-- Run this in Supabase SQL Editor
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- 1. PROFILES TABLE
+CREATE TABLE IF NOT EXISTS public.profiles (
+  id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
+  email TEXT UNIQUE NOT NULL,
+  full_name TEXT,
+  avatar_url TEXT,
+  license_status TEXT DEFAULT 'trial',
+  license_key TEXT UNIQUE,
+  storage_total_gb NUMERIC DEFAULT 5.0,
+  storage_used_gb NUMERIC DEFAULT 0.0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 2. API KEYS TABLE
+CREATE TABLE IF NOT EXISTS public.user_api_keys (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users ON DELETE CASCADE NOT NULL,
+  provider TEXT NOT NULL,
+  api_key_encrypted TEXT NOT NULL,
+  is_valid BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(user_id, provider)
+);
+
+-- 3. DOCUMENTS TABLE
+CREATE TABLE IF NOT EXISTS public.documents (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users ON DELETE CASCADE NOT NULL,
+  title TEXT NOT NULL,
+  original_filename TEXT NOT NULL,
+  file_type TEXT NOT NULL,
+  file_size_bytes BIGINT NOT NULL,
+  storage_path TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable RLS
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_api_keys ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.documents ENABLE ROW LEVEL SECURITY;
+
+-- RLS Policies
+CREATE POLICY "Users can view own profile" ON public.profiles FOR SELECT USING (auth.uid() = id);
+CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "Users can view own documents" ON public.documents FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can manage own documents" ON public.documents FOR ALL USING (auth.uid() = user_id);
+
+-- Function to create profile on signup
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.profiles (id, email, full_name, avatar_url)
+  VALUES (
+    NEW.id,
+    NEW.email,
+    NEW.raw_user_meta_data->>'full_name',
+    NEW.raw_user_meta_data->>'avatar_url'
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();`;
+                
+                document.getElementById('sqlCode').textContent = sql;
+            });
+        
+        let completedSteps = 0;
+        
+        function copySQL() {
+            const sqlCode = document.getElementById('sqlCode').textContent;
+            navigator.clipboard.writeText(sqlCode).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                btn.textContent = '✅ Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = 'Copy';
+                    btn.classList.remove('copied');
+                }, 2000);
+                
+                alert('✅ SQL đã được copy! Giờ click nút "Mở SQL Editor" và paste vào nhé!');
+            });
+        }
+        
+        function markStepComplete(stepNum) {
+            const step = document.getElementById('step' + stepNum);
+            step.classList.add('completed');
+            completedSteps++;
+            updateProgress();
+            
+            if (completedSteps >= 3) {
+                document.getElementById('stepFinal').style.display = 'block';
+                document.getElementById('stepFinal').scrollIntoView({ behavior: 'smooth' });
+                
+                // Confetti effect!
+                alert('🎉 Xin chúc mừng! Bạn đã setup xong Supabase! Giờ test app thôi!');
+            } else {
+                // Scroll to next step
+                const nextStep = document.getElementById('step' + (stepNum + 1));
+                if (nextStep) {
+                    nextStep.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        }
+        
+        function updateProgress() {
+            const progress = (completedSteps / 3) * 100;
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = progress + '%';
+            progressBar.textContent = Math.round(progress) + '%';
+        }
+        
+        function toggleCheck(element) {
+            const checkbox = element.querySelector('input[type="checkbox"]');
+            checkbox.checked = !checkbox.checked;
+            element.classList.toggle('checked');
+        }
+    </script>
+</body>
+</html>
+

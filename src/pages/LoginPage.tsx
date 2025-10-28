@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, ArrowRight, Eye, EyeOff, Loader } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { supabaseAuth } from '../lib/supabase';
 import toast from 'react-hot-toast';
 
 const LoginPage: React.FC = () => {
@@ -56,6 +57,20 @@ const LoginPage: React.FC = () => {
       setErrors({ password: 'Invalid credentials. Please try again.' });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const { error } = await supabaseAuth.signInWithGoogle();
+      if (error) {
+        toast.error('Failed to sign in with Google');
+        console.error('Google login error:', error);
+      }
+      // User will be redirected to Google, then back to app
+    } catch (error) {
+      toast.error('An error occurred');
+      console.error('Google login error:', error);
     }
   };
 
@@ -213,7 +228,7 @@ const LoginPage: React.FC = () => {
             <button
               type="button"
               className="btn-outline py-2.5 text-sm font-medium"
-              onClick={() => toast.info('Google login coming soon!')}
+              onClick={handleGoogleLogin}
             >
               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>

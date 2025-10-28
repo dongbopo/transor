@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transor - Setup Google Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #EA4335 0%, #FBBC05 50%, #34A853 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #EA4335 0%, #FBBC05 50%, #34A853 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .google-icon {
+            font-size: 48px;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .step {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #EA4335;
+        }
+        
+        .step.completed {
+            background: #d4edda;
+            border-left-color: #34A853;
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: #EA4335;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            font-size: 18px;
+            margin-right: 15px;
+        }
+        
+        .step.completed .step-number {
+            background: #34A853;
+        }
+        
+        .step-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+        
+        .step-description {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .btn-google {
+            background: white;
+            color: #333;
+            border: 2px solid #ddd;
+        }
+        
+        .btn-google:hover {
+            border-color: #EA4335;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(234, 67, 53, 0.2);
+        }
+        
+        .btn-success {
+            background: #34A853;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #2d8e47;
+        }
+        
+        .code-box {
+            background: #282c34;
+            color: #61dafb;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 20px 0;
+            position: relative;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 8px 15px;
+            background: #EA4335;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .copy-btn:hover {
+            background: #c23321;
+        }
+        
+        .copy-btn.copied {
+            background: #34A853;
+        }
+        
+        .alert {
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .alert-info {
+            background: #d1ecf1;
+            border: 2px solid #bee5eb;
+            color: #0c5460;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            border: 2px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .alert-warning {
+            background: #fff3cd;
+            border: 2px solid #ffeaa7;
+            color: #856404;
+        }
+        
+        .screenshot {
+            width: 100%;
+            max-width: 600px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin: 20px 0;
+            border: 2px solid #ddd;
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            color: #856404;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #EA4335 0%, #FBBC05 50%, #34A853 100%);
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <span class="google-icon">🔐</span>
+                Setup Google Login
+            </h1>
+            <p>Cho phép người dùng đăng nhập bằng tài khoản Google</p>
+        </div>
+        
+        <div class="content">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar">0%</div>
+            </div>
+            
+            <div class="alert alert-info">
+                <strong>📝 Tổng quan:</strong> Chỉ cần enable Google Provider trong Supabase. Supabase đã tự động tạo sẵn OAuth app cho bạn!
+            </div>
+            
+            <!-- Step 1: Enable Google in Supabase -->
+            <div class="step" id="step1">
+                <div class="step-title">
+                    <span class="step-number">1</span>
+                    <span>Enable Google Provider (30 giây)</span>
+                </div>
+                <div class="step-description">
+                    Supabase có sẵn tích hợp Google OAuth. Chỉ cần bật lên là xong!
+                </div>
+                
+                <div class="alert alert-warning">
+                    <strong>📋 Hướng dẫn:</strong><br>
+                    1. Click nút "Mở Supabase Auth" bên dưới<br>
+                    2. Tìm <span class="highlight">Google</span> trong danh sách Providers<br>
+                    3. Click vào <span class="highlight">Google</span><br>
+                    4. Bật switch <span class="highlight">"Enable Sign in with Google"</span><br>
+                    5. Click <span class="highlight">"Save"</span><br>
+                    6. Quay lại đây, click "Đã xong!"
+                </div>
+                
+                <div style="margin: 20px 0;">
+                    <a href="https://supabase.com/dashboard/project/zwnlxsqptrtksqwjagui/auth/providers" target="_blank" class="btn btn-google">
+                        <span>🔗</span>
+                        Mở Supabase Auth Providers
+                    </a>
+                    <button class="btn btn-success" onclick="markStepComplete(1)">
+                        <span>✅</span>
+                        Đã xong!
+                    </button>
+                </div>
+                
+                <div class="alert alert-info">
+                    <strong>💡 Lưu ý:</strong> Supabase sử dụng Google OAuth mặc định của họ, nên bạn KHÔNG CẦN tạo Google Cloud Project. Đơn giản hơn nhiều!
+                </div>
+            </div>
+            
+            <!-- Step 2: Test Login -->
+            <div class="step" id="step2">
+                <div class="step-title">
+                    <span class="step-number">2</span>
+                    <span>Test Google Login</span>
+                </div>
+                <div class="step-description">
+                    App đã có sẵn nút "Continue with Google". Chỉ cần test thôi!
+                </div>
+                
+                <div class="alert alert-success">
+                    <strong>✅ Đã hoàn thành:</strong><br>
+                    - Google Provider đã được enable<br>
+                    - LoginPage đã có nút Google<br>
+                    - SignupPage đã có nút Google<br>
+                    - AuthContext đã support Google OAuth<br><br>
+                    <strong>🚀 Test ngay:</strong>
+                </div>
+                
+                <div style="margin: 20px 0;">
+                    <a href="http://127.0.0.1:5174/login" target="_blank" class="btn btn-google" style="font-size: 18px; padding: 18px 35px;">
+                        <span>🚀</span>
+                        Mở App & Test Login
+                    </a>
+                </div>
+                
+                <div class="alert alert-warning">
+                    <strong>📋 Cách test:</strong><br>
+                    1. Click nút "Mở App & Test Login"<br>
+                    2. Trên trang Login, click nút <span class="highlight">"Continue with Google"</span><br>
+                    3. Chọn tài khoản Google của bạn<br>
+                    4. Cho phép Supabase truy cập<br>
+                    5. Bạn sẽ tự động đăng nhập vào Transor! 🎉
+                </div>
+                
+                <div style="margin: 20px 0;">
+                    <button class="btn btn-success" onclick="markStepComplete(2)">
+                        <span>✅</span>
+                        Đã test thành công!
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Final -->
+            <div class="step" id="stepFinal" style="display: none;">
+                <div class="step-title">
+                    <span class="step-number">🎉</span>
+                    <span>Hoàn Thành! Google Login Đã Sẵn Sàng</span>
+                </div>
+                
+                <div class="alert alert-success">
+                    <strong>🎊 Chúc mừng! Bạn đã setup xong Google Login!</strong><br><br>
+                    
+                    <strong>✅ Những gì bạn có:</strong><br>
+                    ✓ Đăng nhập bằng Email/Password<br>
+                    ✓ Đăng nhập bằng Google<br>
+                    ✓ Database với Supabase<br>
+                    ✓ Storage cho documents<br>
+                    ✓ RLS policies bảo mật<br>
+                    ✓ Auto-create user profile<br><br>
+                    
+                    <strong>🚀 App đã hoàn chỉnh!</strong><br>
+                    Người dùng giờ có thể:<br>
+                    • Đăng ký/Đăng nhập (Email hoặc Google)<br>
+                    • Upload documents<br>
+                    • Lưu API keys<br>
+                    • Sử dụng translation features<br>
+                    • Quản lý storage<br>
+                </div>
+                
+                <div style="margin-top: 30px; text-align: center;">
+                    <a href="http://127.0.0.1:5174" target="_blank" class="btn btn-google" style="font-size: 22px; padding: 25px 50px; background: linear-gradient(135deg, #EA4335 0%, #FBBC05 50%, #34A853 100%); color: white; border: none;">
+                        <span>🚀</span>
+                        Mở Transor App
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let completedSteps = 0;
+        
+        function markStepComplete(stepNum) {
+            const step = document.getElementById('step' + stepNum);
+            step.classList.add('completed');
+            completedSteps++;
+            updateProgress();
+            
+            if (completedSteps >= 2) {
+                document.getElementById('stepFinal').style.display = 'block';
+                document.getElementById('stepFinal').scrollIntoView({ behavior: 'smooth' });
+                
+                // Success message
+                setTimeout(() => {
+                    alert('🎉 Tuyệt vời! Google Login đã sẵn sàng! Giờ mọi người có thể đăng nhập bằng tài khoản Google rồi!');
+                }, 500);
+            } else {
+                const nextStep = document.getElementById('step' + (stepNum + 1));
+                if (nextStep) {
+                    nextStep.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        }
+        
+        function updateProgress() {
+            const progress = (completedSteps / 2) * 100;
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = progress + '%';
+            progressBar.textContent = Math.round(progress) + '%';
+        }
+    </script>
+</body>
+</html>
+
