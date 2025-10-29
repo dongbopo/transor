@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Check, Loader2, Clock, Type, Star, CheckCircle2 } from 'lucide-react';
 import { LLMProvider, TranslationResult, TranslationComparison } from '../types';
 import { useAuth } from '../contexts/AuthContext';
+import { LLMTranslationService } from '../services/LLMTranslationService';
 import toast from 'react-hot-toast';
 
 interface TranslationComparisonViewProps {
@@ -55,35 +56,64 @@ const TranslationComparisonView: React.FC<TranslationComparisonViewProps> = ({
       return;
     }
 
+    if (!user) {
+      toast.error('Please log in to use translation');
+      return;
+    }
+
     setIsTranslating(true);
 
-    // Simulate API calls to all providers
-    const results: TranslationResult[] = await Promise.all(
-      availableProviders.map(async (provider) => {
-        // Simulate translation time
-        await new Promise((resolve) => setTimeout(resolve, 1000 + Math.random() * 2000));
+    try {
+      // Call real LLM APIs in parallel
+      const startTime = Date.now();
+      const apiResults = await LLMTranslationService.translateMultiple(
+        originalText,
+        targetLanguage,
+        user.apiKeys
+      );
 
-        // Mock translation (replace with actual API call)
+      // Convert to TranslationResult format
+      const results: TranslationResult[] = availableProviders.map((provider) => {
+        const apiResult = apiResults[provider];
+        const timeTaken = (Date.now() - startTime) / 1000;
+
+        if (apiResult.error) {
+          toast.error(`${providerInfo[provider].name}: ${apiResult.error}`);
+          return {
+            model: provider,
+            modelVersion: providerInfo[provider].name,
+            text: `Error: ${apiResult.error}`,
+            timeTaken,
+            wordCount: 0,
+            error: apiResult.error,
+          };
+        }
+
         return {
           model: provider,
-          modelVersion: providerInfo[provider].name,
-          text: `[${providerInfo[provider].name} Translation]\n\n${originalText}\n\n(This is a sample translation. In production, this would be the actual AI translation.)`,
-          timeTaken: Math.random() * 3 + 1,
-          wordCount: originalText.split(' ').length,
+          modelVersion: apiResult.model || providerInfo[provider].name,
+          text: apiResult.translatedText,
+          timeTaken,
+          wordCount: apiResult.translatedText.split(/\s+/).length,
+          tokensUsed: apiResult.tokensUsed,
         };
-      })
-    );
+      });
 
-    setComparison({
-      documentId,
-      samplePage: 1,
-      originalText,
-      translations: results,
-      selectedModel: selectedModel || undefined,
-    });
+      setComparison({
+        documentId,
+        samplePage: 1,
+        originalText,
+        translations: results,
+        selectedModel: selectedModel || undefined,
+      });
 
-    setIsTranslating(false);
-    toast.success('Translation comparison complete!');
+      toast.success('Translation comparison complete!');
+    } catch (error: any) {
+      toast.error('Translation failed: ' + (error.message || 'Unknown error'));
+      console.error('Translation error:', error);
+    } finally {
+      setIsTranslating(false);
+    }
   };
 
   const handleSelectModel = (model: LLMProvider) => {

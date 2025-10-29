@@ -17,14 +17,19 @@ import { DocumentProvider } from './contexts/DocumentContext';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { HealthQuestProvider } from './contexts/HealthQuestContext';
+import { HealthQuestDashboard } from './pages/HealthQuestDashboard';
+import { HealthQuestStats } from './pages/HealthQuestStats';
 
 const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const authPages = ['/login', '/signup'];
+  const healthQuestPages = ['/healthquest', '/healthquest/stats'];
   const isAuthPage = authPages.includes(location.pathname);
+  const isHealthQuestPage = healthQuestPages.some(page => location.pathname.startsWith(page));
 
-  if (isAuthPage) {
+  if (isAuthPage || isHealthQuestPage) {
     return <>{children}</>;
   }
 
@@ -58,6 +63,24 @@ const App: React.FC = () => {
               <Route path="/pricing" element={<PricingPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
+              
+              {/* HealthQuest Routes */}
+              <Route
+                path="/healthquest"
+                element={
+                  <HealthQuestProvider>
+                    <HealthQuestDashboard />
+                  </HealthQuestProvider>
+                }
+              />
+              <Route
+                path="/healthquest/stats"
+                element={
+                  <HealthQuestProvider>
+                    <HealthQuestStats />
+                  </HealthQuestProvider>
+                }
+              />
             </Routes>
             </AppLayout>
           </DocumentProvider>

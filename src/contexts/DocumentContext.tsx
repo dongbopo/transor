@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
-import { ParsedDocument, DocumentFile, ProcessingStatus, ViewMode, Translation, BilingualView } from '../types';
+import { ParsedDocument, DocumentFile, ProcessingStatus, ViewMode, Translation, BilingualView, LLMProvider } from '../types';
+import { LLMTranslationService } from '../services/LLMTranslationService';
+import toast from 'react-hot-toast';
 
 interface DocumentState {
   documents: ParsedDocument[];
@@ -92,7 +94,7 @@ interface DocumentContextType {
   // Helper functions
   uploadDocument: (file: File) => Promise<void>;
   processDocument: (documentId: string) => Promise<void>;
-  translateDocument: (documentId: string, targetLanguage: string) => Promise<void>;
+  translateDocument: (documentId: string, targetLanguage: string, provider: LLMProvider, apiKey: string) => Promise<void>;
   exportDocument: (documentId: string, options: any) => Promise<void>;
 }
 
@@ -169,9 +171,109 @@ export const DocumentProvider: React.FC<DocumentProviderProps> = ({ children }) 
     console.log('Processing document:', documentId);
   };
 
-  const translateDocument = async (documentId: string, targetLanguage: string): Promise<void> => {
-    // Implementation will be added with translation services
-    console.log('Translating document:', documentId, 'to', targetLanguage);
+  const translateDocument = async (
+    documentId: string,
+    targetLanguage: string,
+    provider: LLMProvider,
+    apiKey: string
+  ): Promise<void> => {
+    dispatch({ type: 'SET_LOADING', payload: true });
+    dispatch({ type: 'SET_ERROR', payload: null });
+
+    try {
+      const document = state.documents.find(doc => doc.id === documentId);
+      if (!document) {
+        throw new Error('Document not found');
+      }
+
+      // Update status
+      dispatch({
+        type: 'UPDATE_DOCUMENT_STATUS',
+        payload: {
+          id: documentId,
+          status: {
+            stage: 'translating',
+            progress: 0,
+            message: `Translating to ${targetLanguage}...`,
+          },
+        },
+      });
+
+      // Extract text from document
+      const textToTranslate = document.content.text || 'No content available';
+
+      // For long documents, use chunking
+      let translatedText: string;
+      if (textToTranslate.length > 2000) {
+        translatedText = await LLMTranslationService.translateLongText(
+          textToTranslate,
+          targetLanguage,
+          apiKey,
+          provider
+        );
+      } else {
+        const result = await LLMTranslationService.translate({
+          text: textToTranslate,
+          sourceLanguage: 'auto', // Could detect from document metadata
+          targetLanguage,
+          apiKey,
+          provider,
+        });
+
+        if (result.error) {
+          throw new Error(result.error);
+        }
+
+        translatedText = result.translatedText;
+      }
+
+      // Create translation object
+      const translation: Translation = {
+        id: crypto.randomUUID(),
+        originalText: textToTranslate,
+        translatedText,
+        targetLanguage,
+        sourceLanguage: document.content.metadata.language || 'auto',
+        confidence: 0.95, // Could calculate based on API response
+        wordAlignments: [],
+        createdAt: new Date(),
+      };
+
+      dispatch({ type: 'ADD_TRANSLATION', payload: translation });
+      dispatch({ type: 'SET_CURRENT_TRANSLATION', payload: translation });
+
+      // Update document status
+      dispatch({
+        type: 'UPDATE_DOCUMENT_STATUS',
+        payload: {
+          id: documentId,
+          status: {
+            stage: 'completed',
+            progress: 100,
+            message: 'Translation completed',
+          },
+        },
+      });
+
+      toast.success('Document translated successfully!');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Translation failed';
+      dispatch({ type: 'SET_ERROR', payload: errorMessage });
+      dispatch({
+        type: 'UPDATE_DOCUMENT_STATUS',
+        payload: {
+          id: documentId,
+          status: {
+            stage: 'error',
+            progress: 0,
+            message: errorMessage,
+          },
+        },
+      });
+      toast.error(errorMessage);
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
   };
 
   const exportDocument = async (documentId: string, options: any): Promise<void> => {
