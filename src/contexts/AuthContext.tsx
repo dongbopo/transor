@@ -240,19 +240,55 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // Save to Supabase database (parallel operations)
       const savePromises = Object.entries(keys).map(async ([provider, apiKey]) => {
         if (apiKey && apiKey.trim()) {
-          // Add timeout to prevent hanging
-          const savePromise = supabaseDB.saveAPIKey(state.user!.id, provider, apiKey);
-          const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Request timeout')), 10000)
-          );
+          // Retry logic for timeout issues
+          let lastError: any = null;
+          const maxRetries = 2;
           
-          const { error } = await Promise.race([savePromise, timeoutPromise]) as any;
-          if (error) {
-            console.error(`Error saving ${provider} API key:`, error);
-            throw new Error(`Failed to save ${provider} API key: ${error.message}`);
+          for (let attempt = 0; attempt <= maxRetries; attempt++) {
+            try {
+              // Create timeout promise (30 seconds)
+              const timeoutPromise = new Promise<never>((_, reject) => {
+                setTimeout(() => reject(new Error('Request timeout after 30 seconds')), 30000);
+              });
+              
+              // Race between save and timeout
+              const savePromise = supabaseDB.saveAPIKey(state.user!.id, provider, apiKey);
+              const { error } = await Promise.race([savePromise, timeoutPromise]) as any;
+              
+              if (error) {
+                throw error;
+              }
+              
+              // Success - update local state and return
+              updatedApiKeys[provider as keyof APIKeys] = apiKey;
+              return;
+              
+            } catch (error: any) {
+              lastError = error;
+              
+              // If timeout or network error, retry
+              const isRetriableError = 
+                error.message?.includes('timeout') || 
+                error.message?.includes('network') ||
+                error.message?.includes('fetch') ||
+                error.code === 'ECONNABORTED' ||
+                !error.code; // Unknown errors might be network issues
+              
+              if (attempt < maxRetries && isRetriableError) {
+                const retryDelay = 1000 * (attempt + 1); // Exponential backoff: 1s, 2s
+                console.warn(`Retry ${attempt + 1}/${maxRetries} for ${provider} API key in ${retryDelay}ms...`);
+                await new Promise(resolve => setTimeout(resolve, retryDelay));
+                continue;
+              }
+              
+              // Final failure
+              console.error(`Error saving ${provider} API key:`, error);
+              throw new Error(`Failed to save ${provider} API key: ${error.message || 'Unknown error'}`);
+            }
           }
-          // Update local state immediately
-          updatedApiKeys[provider as keyof APIKeys] = apiKey;
+          
+          // Should not reach here, but just in case
+          throw lastError;
         } else if (apiKey === '' || apiKey === null || apiKey === undefined) {
           // Delete API key if empty
           const deletePromise = supabase

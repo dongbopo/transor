@@ -177,14 +177,21 @@ export const supabaseDB = {
     // - last_validated_at: TIMESTAMP
     // If you get errors about missing columns, run FIX_API_KEYS_SCHEMA.sql
 
+    // Use upsert with simplified options to avoid timeout
+    // Remove .single() to avoid extra query overhead
     const { data, error } = await supabase
       .from('user_api_keys')
       .upsert(upsertData, {
         onConflict: 'user_id,provider',
+        ignoreDuplicates: false,
       })
-      .select()
-      .single();
-    return { data, error };
+      .select();
+
+    // Return first result if array, or single result
+    return { 
+      data: Array.isArray(data) ? data[0] : data, 
+      error 
+    };
   },
 
   // Get user documents
