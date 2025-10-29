@@ -2,7 +2,7 @@
 
 ## Overview
 
-Transor is currently using a **mock authentication system** that stores data in localStorage. To make it production-ready, you need to integrate with a real backend.
+Transer is currently using a **mock authentication system** that stores data in localStorage. To make it production-ready, you need to integrate with a real backend.
 
 ## Quick Start Options
 

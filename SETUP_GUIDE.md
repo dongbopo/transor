@@ -1,8 +1,8 @@
-# 🚀 Transor - Hướng Dẫn Setup Để App Hoạt Động
+# 🚀 Transer - Hướng Dẫn Setup Để App Hoạt Động
 
 ## 📋 Tổng Quan
 
-Để Transor hoạt động hoàn chỉnh, bạn cần setup:
+Để Transer hoạt động hoàn chỉnh, bạn cần setup:
 
 1. **Supabase** - Backend (Database + Auth + Storage)
 2. **Google OAuth** - Đăng nhập
@@ -261,7 +261,7 @@ CREATE TRIGGER update_documents_updated_at BEFORE UPDATE ON public.documents
 
 1. Truy cập: https://console.cloud.google.com
 2. Click **"Select a project"** > **"New Project"**
-3. **Project name:** `Transor`
+3. **Project name:** `Transer`
 4. Click **"Create"**
 
 ### Bước 2: Tạo OAuth Credentials
@@ -270,7 +270,7 @@ CREATE TRIGGER update_documents_updated_at BEFORE UPDATE ON public.documents
 2. Click **"Create Credentials"** > **"OAuth client ID"**
 3. Nếu chưa có, click **"Configure consent screen"**:
    - **User Type:** External
-   - **App name:** Transor
+   - **App name:** Transer
    - **User support email:** Your email
    - **Developer contact:** Your email
    - Click **"Save and Continue"**
@@ -279,7 +279,7 @@ CREATE TRIGGER update_documents_updated_at BEFORE UPDATE ON public.documents
    - Click **"Back to Dashboard"**
 4. Quay lại **Credentials**, click **"Create Credentials"** > **"OAuth client ID"**
 5. **Application type:** Web application
-6. **Name:** Transor Web
+6. **Name:** Transer Web
 7. **Authorized JavaScript origins:**
    ```
    http://localhost:5173
@@ -315,7 +315,7 @@ VITE_SUPABASE_ANON_KEY=eyJhbGc...
 
 # App Config
 VITE_APP_URL=http://localhost:5173
-VITE_APP_NAME=Transor
+VITE_APP_NAME=Transer
 
 # Features
 VITE_ENABLE_GOOGLE_AUTH=true

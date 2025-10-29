@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Transor Deployment Script
+# Transer Deployment Script
 # Usage: ./deploy.sh
 
 set -e
 
-echo "🚀 Deploying Transor to transer.app..."
+echo "🚀 Deploying Transer to transer.app..."
 echo ""
 
 # Colors

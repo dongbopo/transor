@@ -23,7 +23,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
         if (location.pathname.startsWith('/reader')) {
           return 'Document Reader';
         }
-        return 'Transor';
+        return 'Transer';
     }
   };
 

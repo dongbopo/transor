@@ -87,7 +87,7 @@ const LoginPage: React.FC = () => {
             <span className="text-2xl font-bold text-white">T</span>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Welcome back</h1>
-          <p className="text-gray-600 dark:text-gray-400">Log in to your Transor account</p>
+          <p className="text-gray-600 dark:text-gray-400">Log in to your Transer account</p>
         </div>
 
         {/* Login Card */}

@@ -171,7 +171,7 @@ const SettingsPage: React.FC = () => {
           <div className="flex-1">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">API Keys</h2>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Add your own API keys to use Transor. Your keys are stored locally and never sent to our servers.
+              Add your own API keys to use Transer. Your keys are stored locally and never sent to our servers.
             </p>
           </div>
         </div>
@@ -182,7 +182,7 @@ const SettingsPage: React.FC = () => {
             <div className="text-sm text-blue-900 dark:text-blue-100">
               <p className="font-medium mb-1">Your keys, your control</p>
               <p className="text-blue-700 dark:text-blue-300">
-                Transor doesn't charge for translations. You pay directly to the AI providers based on your usage. 
+                Transer doesn't charge for translations. You pay directly to the AI providers based on your usage. 
                 API keys are encrypted and stored only on your device.
               </p>
             </div>

@@ -1,4 +1,4 @@
-# 📝 Deploy Transor - Từng Bước Chi Tiết
+# 📝 Deploy Transer - Từng Bước Chi Tiết
 
 ## ✅ Checklist - Check off khi hoàn thành
 
@@ -41,7 +41,7 @@ git init
 git add .
 
 # Commit
-git commit -m "Initial commit: Transor app with auth, pricing, LLM selection"
+git commit -m "Initial commit: Transer app with auth, pricing, LLM selection"
 
 # Check status
 git status

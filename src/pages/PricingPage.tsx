@@ -74,7 +74,7 @@ const PricingPage: React.FC = () => {
           Free to Use. Forever.
         </h1>
         <p className="text-xl text-gray-600 dark:text-gray-400 mb-2">
-          Transor is 100% free. You only pay for the AI tokens you use.
+          Transer is 100% free. You only pay for the AI tokens you use.
         </p>
         <p className="text-sm text-gray-500 dark:text-gray-500">
           No subscriptions, no hidden fees, no markup.

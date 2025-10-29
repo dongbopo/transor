@@ -115,7 +115,7 @@ const LLMProviderSelector: React.FC<LLMProviderSelectorProps> = ({
             {/* Token Cost Indicator */}
             <div className="mt-3 flex items-center justify-between text-xs">
               <span className="text-gray-500">Cost per 1K tokens:</span>
-              <span className="font-medium text-gray-900">~1 Transor token</span>
+              <span className="font-medium text-gray-900">~1 Transer token</span>
             </div>
           </button>
         ))}

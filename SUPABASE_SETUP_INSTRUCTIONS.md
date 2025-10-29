@@ -8,7 +8,7 @@
 4. ✅ Click **"New Project"**
 5. ✅ Điền thông tin:
    - **Name:** `transor`
-   - **Database Password:** `Transor@2024!` (hoặc password bạn chọn - **LƯU LẠI**)
+   - **Database Password:** `Transer@2024!` (hoặc password bạn chọn - **LƯU LẠI**)
    - **Region:** `Southeast Asia (Singapore)`
    - **Pricing Plan:** **Free**
 6. ✅ Click **"Create new project"**
@@ -59,7 +59,7 @@ VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyxxxxxx
 
 # App Configuration
 VITE_APP_URL=http://localhost:5173
-VITE_APP_NAME=Transor
+VITE_APP_NAME=Transer
 
 # Feature Flags
 VITE_ENABLE_GOOGLE_AUTH=true
@@ -81,7 +81,7 @@ VITE_SUPABASE_ANON_KEY=your_key_here
 
 # App Configuration
 VITE_APP_URL=http://localhost:5173
-VITE_APP_NAME=Transor
+VITE_APP_NAME=Transer
 
 # Feature Flags
 VITE_ENABLE_GOOGLE_AUTH=true

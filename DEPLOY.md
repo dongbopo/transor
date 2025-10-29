@@ -1,4 +1,4 @@
-# 🚀 Deploy Transor to Production
+# 🚀 Deploy Transer to Production
 
 ## Quick Deploy Guide (5 minutes)
 

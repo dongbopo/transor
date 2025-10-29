@@ -1,4 +1,4 @@
-# 🚀 Transor - Tính năng mới
+# 🚀 Transer - Tính năng mới
 
 ## ✨ Các tính năng đã được thêm vào
 
@@ -24,14 +24,14 @@
 - Giới hạn: Chỉ xem, không upload
 
 #### ⚡ Pro Plan ($15/tháng)
-- **100,000 Transor tokens/tháng**
+- **100,000 Transer tokens/tháng**
 - Truy cập tất cả AI models (OpenAI, Gemini, Grok, Claude)
 - Upload không giới hạn
 - Export DOCX/PDF
 - Priority support
 
 #### 👑 Enterprise Plan ($45/tháng)
-- **1,000,000 Transor tokens/tháng**
+- **1,000,000 Transer tokens/tháng**
 - Tất cả tính năng Pro
 - Custom AI training
 - API access

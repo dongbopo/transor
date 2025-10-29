@@ -1,4 +1,4 @@
-# 🚀 Hướng dẫn Deploy Transor lên transer.app
+# 🚀 Hướng dẫn Deploy Transer lên transer.app
 
 ## Phương án 1: Vercel (Khuyên dùng - Dễ nhất)
 
@@ -13,7 +13,7 @@ git init
 git add .
 
 # Commit
-git commit -m "Initial commit - Transor with auth, pricing, and LLM selection"
+git commit -m "Initial commit - Transer with auth, pricing, and LLM selection"
 
 # Tạo repository trên GitHub (https://github.com/new)
 # Sau đó link và push:
@@ -39,7 +39,7 @@ git push -u origin main
 
 **Trong Vercel Dashboard:**
 
-1. Vào project Transor
+1. Vào project Transer
 2. Click **"Settings"** → **"Domains"**
 3. Add domain: `transer.app`
 4. Add domain: `www.transer.app` (optional)

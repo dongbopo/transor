@@ -44,7 +44,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded flex items-center justify-center text-white font-bold text-sm shadow-sm">
                 T
               </div>
-              <span className="font-semibold text-sm truncate text-gray-900 dark:text-[#fafafa]">Transor</span>
+              <span className="font-semibold text-sm truncate text-gray-900 dark:text-[#fafafa]">Transer</span>
             </div>
             <div className="flex items-center space-x-1">
               <button className="text-gray-400 dark:text-[#a1a1aa] hover:text-gray-600 dark:hover:text-[#fafafa] hidden lg:block transition-colors">

@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lấy Google OAuth Client ID - Hướng Dẫn Chi Tiết</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #4285F4 0%, #EA4335 25%, #FBBC05 75%, #34A853 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4285F4 0%, #EA4335 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .step {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #4285F4;
+            position: relative;
+        }
+        
+        .step.completed {
+            background: #d4edda;
+            border-left-color: #34A853;
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: #4285F4;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            font-size: 18px;
+            margin-right: 15px;
+        }
+        
+        .step.completed .step-number {
+            background: #34A853;
+        }
+        
+        .step-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+        
+        .step-description {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .btn-primary {
+            background: #4285F4;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #3367D6;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(66, 133, 244, 0.3);
+        }
+        
+        .btn-success {
+            background: #34A853;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #2d8e47;
+        }
+        
+        .btn-copy {
+            background: #EA4335;
+            color: white;
+        }
+        
+        .btn-copy:hover {
+            background: #c23321;
+        }
+        
+        .code-box {
+            background: #f8f9fa;
+            border: 2px solid #4285F4;
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            margin: 15px 0;
+            position: relative;
+            word-break: break-all;
+        }
+        
+        .copy-btn-inline {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 12px;
+            background: #4285F4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+        
+        .copy-btn-inline:hover {
+            background: #3367D6;
+        }
+        
+        .copy-btn-inline.copied {
+            background: #34A853;
+        }
+        
+        .alert {
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .alert-info {
+            background: #E8F0FE;
+            border: 2px solid #4285F4;
+            color: #1967D2;
+        }
+        
+        .alert-success {
+            background: #E6F4EA;
+            border: 2px solid #34A853;
+            color: #137333;
+        }
+        
+        .alert-warning {
+            background: #FEF7E0;
+            border: 2px solid #F9AB00;
+            color: #E37400;
+        }
+        
+        .screenshot {
+            width: 100%;
+            max-width: 700px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin: 20px 0;
+            border: 2px solid #ddd;
+        }
+        
+        .highlight {
+            background: #FEF7E0;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            color: #E37400;
+            font-family: 'Monaco', 'Courier New', monospace;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4285F4 0%, #34A853 100%);
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .checklist {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #4285F4;
+            margin: 20px 0;
+        }
+        
+        .checklist-item {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+        }
+        
+        .checklist-item:last-child {
+            border-bottom: none;
+        }
+        
+        .checklist-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+        }
+        
+        .final-result {
+            background: linear-gradient(135deg, #E6F4EA 0%, #E8F0FE 100%);
+            padding: 30px;
+            border-radius: 15px;
+            border: 3px solid #34A853;
+            margin: 30px 0;
+        }
+        
+        .credential-display {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #4285F4;
+        }
+        
+        .credential-label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .credential-value {
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            color: #333;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <span style="font-size: 48px;">🔑</span>
+                Lấy Google OAuth Client ID
+            </h1>
+            <p style="font-size: 18px;">Chỉ 5 bước đơn giản, mỗi bước 1 phút!</p>
+        </div>
+        
+        <div class="content">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar">0%</div>
+            </div>
+            
+            <div class="alert alert-info">
+                <strong>📝 Tổng quan:</strong> Bạn cần tạo Google Cloud Project và lấy OAuth credentials. Đừng lo, mọi thứ đều MIỄN PHÍ và CỰC KỲ ĐƠN GIẢN!
+            </div>
+            
+            <!-- Step 1: Create Google Cloud Project -->
+            <div class="step" id="step1">
+                <div class="step-title">
+                    <span class="step-number">1</span>
+                    <span>Tạo Google Cloud Project</span>
+                </div>
+                <div class="step-description">
+                    Google Cloud Project là nơi quản lý OAuth credentials của bạn.
+                </div>
+                
+                <div class="alert alert-warning">
+                    <strong>📋 Làm theo từng bước:</strong><br>
+                    1. Click nút "Mở Google Cloud Console" bên dưới<br>
+                    2. Click nút <span class="highlight">Select a project</span> ở góc trên<br>
+                    3. Click <span class="highlight">NEW PROJECT</span><br>
+                    4. Project name: Gõ <span class="highlight">Transer</span><br>
+                    5. Click <span class="highlight">CREATE</span><br>
+                    6. Đợi 10 giây, project sẽ được tạo<br>
+                    7. Quay lại đây, click "Đã xong!"
+                </div>
+                
+                <div style="margin: 20px 0;">
+                    <a href="https://console.cloud.google.com/projectcreate" target="_blank" class="btn btn-primary">
+                        <span>🔗</span>
+                        Mở Google Cloud Console
+                    </a>
+                    <button class="btn btn-success" onclick="markStepComplete(1)">
+                        <span>✅</span>
+                        Đã xong!
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Step 2: Configure OAuth Consent Screen -->
+            <div class="step" id="step2">
+                <div class="step-title">
+                    <span class="step-number">2</span>
+                    <span>Cấu hình OAuth Consent Screen</span>
+                </div>
+                <div class="step-description">
+                    Đây là màn hình người dùng thấy khi đăng nhập bằng Google.
+                </div>
+                
+                <div class="alert alert-warning">
+                    <strong>📋 Làm theo từng bước:</strong><br>
+                    1. Click nút "Mở OAuth Consent Screen" bên dưới<br>
+                    2. Chọn <span class="highlight">External</span> (cho phép mọi người dùng)<br>
+                    3. Click <span class="highlight">CREATE</span><br>
+                    4. Điền form:<br>
+                    &nbsp;&nbsp;- App name: <span class="highlight">Transer</span><br>
+                    &nbsp;&nbsp;- User support email: <span class="highlight">Email của bạn</span><br>
+                    &nbsp;&nbsp;- Developer contact: <span class="highlight">Email của bạn</span><br>
+                    5. Click <span class="highlight">SAVE AND CONTINUE</span><br>
+                    6. Trang Scopes: Click <span class="highlight">SAVE AND CONTINUE</span> (bỏ qua)<br>
+                    7. Trang Test users: Click <span class="highlight">SAVE AND CONTINUE</span> (bỏ qua)<br>
+                    8. Trang Summary: Click <span class="highlight">BACK TO DASHBOARD</span><br>
+                    9. Quay lại đây, click "Đã xong!"
+                </div>
+                
+                <div style="margin: 20px 0;">
+                    <a href="https://console.cloud.google.com/apis/credentials/consent" target="_blank" class="btn btn-primary">
+                        <span>🔗</span>
+                        Mở OAuth Consent Screen
+                    </a>
+                    <button class="btn btn-success" onclick="markStepComplete(2)">
+                        <span>✅</span>
+                        Đã xong!
+                    </button>
+                </div>
+                
+                <div class="checklist">
+                    <h4 style="margin-bottom: 15px;">✅ Checklist:</h4>
+                    <div class="checklist-item">
+                        <input type="checkbox">
+                        <span>Đã chọn "External"</span>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox">
+                        <span>Đã điền App name "Transer"</span>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox">
+                        <span>Đã điền 2 email</span>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox">
+                        <span>Đã click qua 3 trang (Scopes, Test users, Summary)</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 3: Create OAuth Credentials -->
+            <div class="step" id="step3">
+                <div class="step-title">
+                    <span class="step-number">3</span>
+                    <span>Tạo OAuth Client ID</span>
+                </div>
+                <div class="step-description">
+                    Đây là bước lấy Client ID và Client Secret!
+                </div>
+                
+                <div class="alert alert-warning">
+                    <strong>📋 Làm theo từng bước:</strong><br>
+                    1. Click nút "Mở Credentials" bên dưới<br>
+                    2. Click <span class="highlight">+ CREATE CREDENTIALS</span> ở trên<br>
+                    3. Chọn <span class="highlight">OAuth client ID</span><br>
+                    4. Application type: Chọn <span class="highlight">Web application</span><br>
+                    5. Name: Gõ <span class="highlight">Transer Web</span><br>
+                    6. Authorized JavaScript origins: Click <span class="highlight">+ ADD URI</span><br>
+                    &nbsp;&nbsp;- Gõ: <span class="highlight">http://localhost:5174</span><br>
+                    &nbsp;&nbsp;- Click <span class="highlight">+ ADD URI</span> lại<br>
+                    &nbsp;&nbsp;- Gõ: <span class="highlight">https://transer.app</span><br>
+                    7. Authorized redirect URIs: Click <span class="highlight">+ ADD URI</span><br>
+                    &nbsp;&nbsp;- Copy URI bên dưới và paste vào<br>
+                    8. Click <span class="highlight">CREATE</span><br>
+                    9. Popup xuất hiện với Client ID và Secret<br>
+                    10. Copy cả 2 vào form bên dưới!
+                </div>
+                
+                <div style="margin: 20px 0;">
+                    <div class="alert alert-info">
+                        <strong>📋 Copy Redirect URI này:</strong>
+                        <div class="code-box">
+                            <button class="copy-btn-inline" onclick="copyText('redirectUri')">Copy</button>
+                            <div id="redirectUri">https://zwnlxsqptrtksqwjagui.supabase.co/auth/v1/callback</div>
+                        </div>
+                    </div>
+                    
+                    <a href="https://console.cloud.google.com/apis/credentials" target="_blank" class="btn btn-primary">
+                        <span>🔗</span>
+                        Mở Credentials
+                    </a>
+                    <button class="btn btn-success" onclick="markStepComplete(3)">
+                        <span>✅</span>
+                        Đã tạo xong!
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Step 4: Save Credentials -->
+            <div class="step" id="step4">
+                <div class="step-title">
+                    <span class="step-number">4</span>
+                    <span>Lưu Client ID và Client Secret</span>
+                </div>
+                <div class="step-description">
+                    Paste Client ID và Client Secret vào đây để lưu lại!
+                </div>
+                
+                <div style="margin: 20px 0;">
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 5px;">Client ID:</label>
+                        <input type="text" id="clientId" placeholder="Paste Client ID here..." style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-family: Monaco, monospace; font-size: 13px;">
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 5px;">Client Secret:</label>
+                        <input type="text" id="clientSecret" placeholder="Paste Client Secret here..." style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-family: Monaco, monospace; font-size: 13px;">
+                    </div>
+                    
+                    <button class="btn btn-success" onclick="saveCredentials()">
+                        <span>💾</span>
+                        Lưu Credentials
+                    </button>
+                </div>
+                
+                <div id="savedCredentials" style="display: none;">
+                    <div class="alert alert-success">
+                        <strong>✅ Đã lưu thành công!</strong> Giờ paste vào Supabase thôi!
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 5: Configure Supabase -->
+            <div class="step" id="step5">
+                <div class="step-title">
+                    <span class="step-number">5</span>
+                    <span>Cấu hình Supabase</span>
+                </div>
+                <div class="step-description">
+                    Bước cuối cùng: Paste Client ID và Secret vào Supabase!
+                </div>
+                
+                <div class="alert alert-warning">
+                    <strong>📋 Làm theo từng bước:</strong><br>
+                    1. Click nút "Mở Supabase Auth" bên dưới<br>
+                    2. Tìm <span class="highlight">Google</span> trong danh sách<br>
+                    3. Click vào <span class="highlight">Google</span><br>
+                    4. Bật switch <span class="highlight">"Enable Sign in with Google"</span><br>
+                    5. Paste <span class="highlight">Client ID</span> từ bước 4<br>
+                    6. Paste <span class="highlight">Client Secret</span> từ bước 4<br>
+                    7. Click <span class="highlight">Save</span><br>
+                    8. Quay lại đây, click "Hoàn thành!"
+                </div>
+                
+                <div id="credentialsCopy" style="display: none; margin: 20px 0;">
+                    <div class="final-result">
+                        <h3 style="margin-bottom: 20px; color: #137333;">📋 Credentials của bạn:</h3>
+                        
+                        <div class="credential-display">
+                            <div class="credential-label">CLIENT ID:</div>
+                            <div class="credential-value" id="displayClientId"></div>
+                            <button class="btn btn-copy" onclick="copyText('displayClientId')" style="margin-top: 10px; font-size: 12px; padding: 8px 15px;">
+                                Copy Client ID
+                            </button>
+                        </div>
+                        
+                        <div class="credential-display">
+                            <div class="credential-label">CLIENT SECRET:</div>
+                            <div class="credential-value" id="displayClientSecret"></div>
+                            <button class="btn btn-copy" onclick="copyText('displayClientSecret')" style="margin-top: 10px; font-size: 12px; padding: 8px 15px;">
+                                Copy Client Secret
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin: 20px 0;">
+                    <a href="https://supabase.com/dashboard/project/zwnlxsqptrtksqwjagui/auth/providers" target="_blank" class="btn btn-primary">
+                        <span>🔗</span>
+                        Mở Supabase Auth
+                    </a>
+                    <button class="btn btn-success" onclick="markStepComplete(5)">
+                        <span>🎉</span>
+                        Hoàn thành!
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Final Step -->
+            <div class="step" id="stepFinal" style="display: none; background: linear-gradient(135deg, #E6F4EA 0%, #E8F0FE 100%); border-left-color: #34A853;">
+                <div class="step-title">
+                    <span class="step-number">🎉</span>
+                    <span>Hoàn Thành! Test Google Login Ngay!</span>
+                </div>
+                
+                <div class="alert alert-success">
+                    <strong>🎊 Xin chúc mừng! Google OAuth đã sẵn sàng!</strong><br><br>
+                    
+                    <strong>✅ Bạn đã hoàn thành:</strong><br>
+                    ✓ Tạo Google Cloud Project<br>
+                    ✓ Cấu hình OAuth Consent Screen<br>
+                    ✓ Tạo OAuth Client ID & Secret<br>
+                    ✓ Cấu hình Supabase với Google OAuth<br><br>
+                    
+                    <strong>🚀 Giờ test thử ngay!</strong>
+                </div>
+                
+                <div style="margin-top: 30px; text-align: center;">
+                    <a href="http://127.0.0.1:5174/login" target="_blank" class="btn btn-primary" style="font-size: 22px; padding: 25px 50px;">
+                        <span>🚀</span>
+                        Mở App & Test Google Login
+                    </a>
+                </div>
+                
+                <div class="alert alert-info" style="margin-top: 20px;">
+                    <strong>💡 Cách test:</strong><br>
+                    1. Click nút "Mở App & Test Google Login"<br>
+                    2. Click nút "Continue with Google"<br>
+                    3. Chọn tài khoản Google của bạn<br>
+                    4. Cho phép Transer truy cập<br>
+                    5. Bạn sẽ tự động đăng nhập! 🎉
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let completedSteps = 0;
+        let savedClientId = '';
+        let savedClientSecret = '';
+        
+        function markStepComplete(stepNum) {
+            const step = document.getElementById('step' + stepNum);
+            step.classList.add('completed');
+            completedSteps++;
+            updateProgress();
+            
+            // Scroll to next step
+            const nextStep = document.getElementById('step' + (stepNum + 1));
+            if (nextStep) {
+                nextStep.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            
+            if (completedSteps >= 5) {
+                document.getElementById('stepFinal').style.display = 'block';
+                document.getElementById('stepFinal').scrollIntoView({ behavior: 'smooth' });
+                
+                setTimeout(() => {
+                    alert('🎉 Hoàn thành! Giờ test Google Login ngay thôi!');
+                }, 500);
+            }
+        }
+        
+        function saveCredentials() {
+            const clientId = document.getElementById('clientId').value.trim();
+            const clientSecret = document.getElementById('clientSecret').value.trim();
+            
+            if (!clientId || !clientSecret) {
+                alert('❌ Vui lòng điền cả Client ID và Client Secret!');
+                return;
+            }
+            
+            savedClientId = clientId;
+            savedClientSecret = clientSecret;
+            
+            document.getElementById('savedCredentials').style.display = 'block';
+            document.getElementById('credentialsCopy').style.display = 'block';
+            document.getElementById('displayClientId').textContent = clientId;
+            document.getElementById('displayClientSecret').textContent = clientSecret;
+            
+            markStepComplete(4);
+            
+            alert('✅ Đã lưu thành công! Giờ paste vào Supabase nhé!');
+        }
+        
+        function copyText(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Copied!';
+                btn.style.background = '#34A853';
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '';
+                }, 2000);
+            });
+        }
+        
+        function updateProgress() {
+            const progress = (completedSteps / 5) * 100;
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = progress + '%';
+            progressBar.textContent = Math.round(progress) + '%';
+        }
+    </script>
+</body>
+</html>
+
