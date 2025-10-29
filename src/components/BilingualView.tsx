@@ -1,6 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import SplitPane from 'react-split-pane';
 import { ParsedDocument, Translation, ViewMode, DocumentSegment } from '../types';
 
 interface BilingualViewProps {
@@ -12,8 +11,11 @@ interface BilingualViewProps {
 const BilingualView: React.FC<BilingualViewProps> = ({ document, translation, viewMode }) => {
   const [synchronizedScroll, setSynchronizedScroll] = useState(true);
   const [highlightedSegment, setHighlightedSegment] = useState<string | null>(null);
+  const [splitPosition, setSplitPosition] = useState(50); // 50% split
+  const [isDragging, setIsDragging] = useState(false);
   const leftPaneRef = useRef<HTMLDivElement>(null);
   const rightPaneRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Mock translation data - in real implementation, this would come from the translation service
   const mockTranslation: Translation = {
@@ -63,6 +65,38 @@ const BilingualView: React.FC<BilingualViewProps> = ({ document, translation, vi
     }
   };
 
+  const handleMouseDown = () => {
+    setIsDragging(true);
+  };
+
+  const handleMouseMove = React.useCallback((e: MouseEvent) => {
+    if (!isDragging || !containerRef.current) return;
+    
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const percentage = (x / rect.width) * 100;
+    
+    // Limit between 20% and 80%
+    const clampedPercentage = Math.max(20, Math.min(80, percentage));
+    setSplitPosition(clampedPercentage);
+  }, [isDragging]);
+
+  const handleMouseUp = React.useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  React.useEffect(() => {
+    if (isDragging) {
+      const doc = window.document;
+      doc.addEventListener('mousemove', handleMouseMove);
+      doc.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        doc.removeEventListener('mousemove', handleMouseMove);
+        doc.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isDragging, handleMouseMove, handleMouseUp]);
+
   const renderSegment = (segment: DocumentSegment, isTranslation: boolean = false) => {
     const text = isTranslation ? segment.text + ' (translated)' : segment.text;
     
@@ -95,15 +129,13 @@ const BilingualView: React.FC<BilingualViewProps> = ({ document, translation, vi
   };
 
   return (
-    <div className="h-full">
-      <SplitPane
-        split="vertical"
-        minSize={300}
-        defaultSize="50%"
-        className="h-full"
-      >
+    <div ref={containerRef} className="h-full flex relative">
         {/* Left Pane - Original */}
-        <div className="h-full overflow-auto p-6 bg-white">
+        <div 
+          ref={leftPaneRef}
+          className="h-full overflow-auto p-6 bg-white"
+          style={{ width: `${splitPosition}%` }}
+        >
           <div className="sticky top-0 bg-white border-b border-gray-200 pb-4 mb-6 z-10">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900">Original Text</h3>
@@ -122,7 +154,6 @@ const BilingualView: React.FC<BilingualViewProps> = ({ document, translation, vi
           </div>
 
           <div
-            ref={leftPaneRef}
             className="space-y-4"
             onScroll={() => handleScroll('left')}
           >
@@ -130,8 +161,20 @@ const BilingualView: React.FC<BilingualViewProps> = ({ document, translation, vi
           </div>
         </div>
 
+        {/* Splitter */}
+        <div
+          className="w-1 bg-gray-300 hover:bg-gray-400 cursor-col-resize flex-shrink-0 relative z-10"
+          onMouseDown={handleMouseDown}
+        >
+          <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-8" />
+        </div>
+
         {/* Right Pane - Translation */}
-        <div className="h-full overflow-auto p-6 bg-gray-50">
+        <div 
+          ref={rightPaneRef}
+          className="h-full overflow-auto p-6 bg-gray-50"
+          style={{ width: `${100 - splitPosition}%` }}
+        >
           <div className="sticky top-0 bg-gray-50 border-b border-gray-200 pb-4 mb-6 z-10">
             <h3 className="text-lg font-semibold text-gray-900">
               Translation ({currentTranslation.targetLanguage.toUpperCase()})
@@ -142,14 +185,12 @@ const BilingualView: React.FC<BilingualViewProps> = ({ document, translation, vi
           </div>
 
           <div
-            ref={rightPaneRef}
             className="space-y-4"
             onScroll={() => handleScroll('right')}
           >
             {mockSegments.map((segment) => renderSegment(segment, true))}
           </div>
         </div>
-      </SplitPane>
     </div>
   );
 };
