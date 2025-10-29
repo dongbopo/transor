@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Deploy Transer lên Production</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        .header h1 { font-size: 36px; margin-bottom: 10px; }
+        .content { padding: 40px; }
+        .step {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+        .step.completed {
+            background: #d4edda;
+            border-left-color: #34A853;
+        }
+        .step-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        .step.completed .step-number { background: #34A853; }
+        .step-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin: 5px;
+        }
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-primary:hover { background: #5568d3; transform: translateY(-2px); }
+        .btn-success { background: #34A853; color: white; }
+        .btn-success:hover { background: #2d8e47; }
+        .alert {
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .alert-info {
+            background: #E8F0FE;
+            border: 2px solid #4285F4;
+            color: #1967D2;
+        }
+        .alert-success {
+            background: #E6F4EA;
+            border: 2px solid #34A853;
+            color: #137333;
+        }
+        .alert-warning {
+            background: #FEF7E0;
+            border: 2px solid #F9AB00;
+            color: #E37400;
+        }
+        .code-box {
+            background: #282c34;
+            color: #61dafb;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Monaco', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Deploy Transer lên Production</h1>
+            <p style="font-size: 18px;">Chỉ 6 bước để app hoạt động trên https://transer.app</p>
+        </div>
+        
+        <div class="content">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar">0%</div>
+            </div>
+            
+            <div class="alert alert-info">
+                <strong>📝 Tổng quan:</strong> Deploy lên Vercel, setup domain, config OAuth. Mỗi bước có hướng dẫn chi tiết!
+            </div>
+            
+            <!-- Step 1: Install Vercel CLI -->
+            <div class="step" id="step1">
+                <div class="step-title">
+                    <span class="step-number">1</span>
+                    <span>Install & Login Vercel</span>
+                </div>
+                <div class="alert alert-warning">
+                    <strong>📋 Làm trong Terminal:</strong><br>
+                    <div class="code-box">
+npm i -g vercel<br>
+vercel login
+                    </div>
+                    - Click link để login hoặc dùng email<br>
+                    - Sau khi login thành công, click "Đã xong!"
+                </div>
+                <button class="btn btn-success" onclick="markStepComplete(1)">✅ Đã xong!</button>
+            </div>
+            
+            <!-- Step 2: Deploy to Vercel -->
+            <div class="step" id="step2">
+                <div class="step-title">
+                    <span class="step-number">2</span>
+                    <span>Deploy lên Vercel</span>
+                </div>
+                <div class="alert alert-warning">
+                    <strong>📋 Chạy lệnh trong Terminal:</strong><br>
+                    <div class="code-box">
+cd /Users/dongbo/transor<br>
+vercel --prod
+                    </div>
+                    Hoặc dùng script tự động:<br>
+                    <div class="code-box">
+./deploy-production.sh
+                    </div>
+                    - Trả lời questions: Y, chọn account, N (new project), Enter<br>
+                    - Đợi deploy xong, bạn sẽ có URL tạm (vd: transer.vercel.app)
+                </div>
+                <button class="btn btn-success" onclick="markStepComplete(2)">✅ Đã deploy!</button>
+            </div>
+            
+            <!-- Step 3: Add Environment Variables -->
+            <div class="step" id="step3">
+                <div class="step-title">
+                    <span class="step-number">3</span>
+                    <span>Thêm Environment Variables</span>
+                </div>
+                <div class="alert alert-warning">
+                    <strong>📋 Làm trong Vercel Dashboard:</strong><br>
+                    1. Click nút "Mở Vercel Dashboard" bên dưới<br>
+                    2. Vào project → Settings → Environment Variables<br>
+                    3. Thêm từng biến sau (Copy từ wizard):<br><br>
+                    <strong>VITE_SUPABASE_URL</strong><br>
+                    <div class="code-box" id="supabaseUrl">https://zwnlxsqptrtksqwjagui.supabase.co</div><br>
+                    <strong>VITE_SUPABASE_ANON_KEY</strong><br>
+                    <div class="code-box" id="supabaseKey">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp3bmx4c3FwdHJ0a3Nxd2phZ3VpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE2NDkwMzksImV4cCI6MjA3NzIyNTAzOX0.i5NYtctcElcFTtD2sldSO2xmoOqACqXD2kNafnX2lDo</div><br>
+                    <strong>VITE_APP_URL</strong>: https://transer.app<br>
+                    <strong>VITE_APP_NAME</strong>: Transer<br>
+                    <strong>VITE_ENABLE_GOOGLE_AUTH</strong>: true<br>
+                    <strong>VITE_ENABLE_STRIPE_PAYMENTS</strong>: false<br><br>
+                    4. Apply to: Production, Preview, Development<br>
+                    5. Redeploy sau khi save
+                </div>
+                <a href="https://vercel.com/dashboard" target="_blank" class="btn btn-primary">🔗 Mở Vercel Dashboard</a>
+                <button class="btn btn-success" onclick="markStepComplete(3)">✅ Đã thêm!</button>
+            </div>
+            
+            <!-- Step 4: Setup Domain -->
+            <div class="step" id="step4">
+                <div class="step-title">
+                    <span class="step-number">4</span>
+                    <span>Setup Domain transer.app</span>
+                </div>
+                <div class="alert alert-warning">
+                    <strong>📋 Làm trong Vercel + Namecheap:</strong><br>
+                    1. Vercel Dashboard → Project → Settings → Domains<br>
+                    2. Thêm: <strong>transer.app</strong><br>
+                    3. Copy DNS records mà Vercel hiển thị<br>
+                    4. Vào Namecheap → Domain List → Manage transer.app<br>
+                    5. Advanced DNS → Thêm records:<br>
+                    &nbsp;&nbsp;Type: CNAME, Host: @, Value: cname.vercel-dns.com<br>
+                    &nbsp;&nbsp;Type: CNAME, Host: www, Value: cname.vercel-dns.com<br>
+                    6. Save, đợi 15-30 phút
+                </div>
+                <a href="https://vercel.com/dashboard" target="_blank" class="btn btn-primary">🔗 Vercel Dashboard</a>
+                <a href="https://ap.www.namecheap.com/" target="_blank" class="btn btn-primary">🔗 Namecheap</a>
+                <button class="btn btn-success" onclick="markStepComplete(4)">✅ Đã setup!</button>
+            </div>
+            
+            <!-- Step 5: Update Google OAuth -->
+            <div class="step" id="step5">
+                <div class="step-title">
+                    <span class="step-number">5</span>
+                    <span>Update Google OAuth</span>
+                </div>
+                <div class="alert alert-warning">
+                    <strong>📋 Làm trong Google Cloud Console:</strong><br>
+                    1. Click "Mở Google Cloud Console"<br>
+                    2. APIs & Services → Credentials<br>
+                    3. Click vào OAuth Client ID của bạn<br>
+                    4. Authorized JavaScript origins: Thêm<br>
+                    &nbsp;&nbsp;<strong>https://transer.app</strong><br>
+                    &nbsp;&nbsp;<strong>https://www.transer.app</strong><br>
+                    5. Save
+                </div>
+                <a href="https://console.cloud.google.com/apis/credentials" target="_blank" class="btn btn-primary">🔗 Google Cloud Console</a>
+                <button class="btn btn-success" onclick="markStepComplete(5)">✅ Đã update!</button>
+            </div>
+            
+            <!-- Step 6: Update Supabase -->
+            <div class="step" id="step6">
+                <div class="step-title">
+                    <span class="step-number">6</span>
+                    <span>Update Supabase</span>
+                </div>
+                <div class="alert alert-warning">
+                    <strong>📋 Làm trong Supabase Dashboard:</strong><br>
+                    1. Click "Mở Supabase"<br>
+                    2. Settings → Authentication → URL Configuration<br>
+                    3. Site URL: <strong>https://transer.app</strong><br>
+                    4. Redirect URLs: Thêm<br>
+                    &nbsp;&nbsp;<strong>https://transer.app/**</strong><br>
+                    &nbsp;&nbsp;<strong>https://www.transer.app/**</strong><br>
+                    5. Save
+                </div>
+                <a href="https://supabase.com/dashboard/project/zwnlxsqptrtksqwjagui/settings/auth" target="_blank" class="btn btn-primary">🔗 Supabase Dashboard</a>
+                <button class="btn btn-success" onclick="markStepComplete(6)">✅ Đã update!</button>
+            </div>
+            
+            <!-- Final -->
+            <div class="step" id="stepFinal" style="display: none;">
+                <div class="step-title">
+                    <span class="step-number">🎉</span>
+                    <span>Hoàn Thành! Test Production</span>
+                </div>
+                <div class="alert alert-success">
+                    <strong>🎊 Xin chúc mừng! App đã sẵn sàng!</strong><br><br>
+                    ✅ Deployed lên Vercel<br>
+                    ✅ Domain đã setup<br>
+                    ✅ Environment variables đã config<br>
+                    ✅ Google OAuth đã update<br>
+                    ✅ Supabase đã config<br><br>
+                    <strong>🚀 App URL:</strong> <a href="https://transer.app" target="_blank">https://transer.app</a>
+                </div>
+                <div style="margin-top: 20px;">
+                    <a href="https://transer.app" target="_blank" class="btn btn-primary" style="font-size: 20px; padding: 20px 40px;">
+                        🚀 Mở Transer App
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let completed = 0;
+        function markStepComplete(n) {
+            document.getElementById('step' + n).classList.add('completed');
+            completed++;
+            document.getElementById('progressBar').style.width = (completed/6*100) + '%';
+            document.getElementById('progressBar').textContent = Math.round(completed/6*100) + '%';
+            if (completed === 6) {
+                document.getElementById('stepFinal').style.display = 'block';
+                document.getElementById('stepFinal').scrollIntoView({ behavior: 'smooth' });
+            } else {
+                const next = document.getElementById('step' + (n + 1));
+                if (next) next.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    </script>
+</body>
+</html>
+

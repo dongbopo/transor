@@ -41,11 +41,25 @@ export const supabaseAuth = {
 
   // Sign in with Google OAuth
   signInWithGoogle: async () => {
-    // Get redirect URL - use current origin (works for both localhost and production)
-    const redirectTo = `${window.location.origin}${window.location.pathname === '/login' || window.location.pathname === '/signup' ? '/' : window.location.pathname}`;
+    // Redirect to home page after successful login
+    const redirectTo = `${window.location.origin}/`;
     
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
+      options: {
+        redirectTo: redirectTo,
+      },
+    });
+    return { data, error };
+  },
+
+  // Sign in with GitHub OAuth
+  signInWithGitHub: async () => {
+    // Redirect to home page after successful login
+    const redirectTo = `${window.location.origin}/`;
+    
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'github',
       options: {
         redirectTo: redirectTo,
       },
