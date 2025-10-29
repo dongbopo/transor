@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, AuthState, APIKeys, LLMProvider, LicenseStatus } from '../types';
-import { supabaseAuth, supabaseDB } from '../lib/supabase';
+import { supabaseAuth, supabaseDB, supabase } from '../lib/supabase';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface AuthContextType extends AuthState {
@@ -56,20 +56,50 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Get user profile from database
     const { data: profile } = await supabaseDB.getProfile(supabaseUser.id);
     
+    // Load API keys from database
+    const { data: apiKeysData } = await supabaseDB.getAPIKeys(supabaseUser.id);
+    const apiKeys: APIKeys = {
+      openai: '',
+      gemini: '',
+      grok: '',
+      claude: '',
+    };
+    
+    if (apiKeysData) {
+      apiKeysData.forEach((keyData: any) => {
+        if (keyData.provider && keyData.api_key_encrypted) {
+          apiKeys[keyData.provider as keyof APIKeys] = keyData.api_key_encrypted;
+        }
+      });
+    }
+
+    // Load preferences from profile
+    let preferences = {
+      defaultProvider: 'openai' as const,
+      theme: 'system' as const,
+      language: 'en',
+      defaultReadingMode: 'parallel' as const,
+      fontSize: 16,
+      lineHeight: 1.6,
+    };
+
+    if (profile?.preferences) {
+      try {
+        preferences = typeof profile.preferences === 'string' 
+          ? JSON.parse(profile.preferences) 
+          : profile.preferences;
+      } catch (e) {
+        console.error('Error parsing preferences:', e);
+      }
+    }
+    
     return {
       id: supabaseUser.id,
       email: supabaseUser.email || '',
       name: profile?.full_name || supabaseUser.user_metadata?.full_name || '',
       avatar: profile?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${supabaseUser.email}`,
-      apiKeys: {},
-      preferences: {
-        defaultProvider: 'openai',
-        theme: 'system',
-        language: 'en',
-        defaultReadingMode: 'parallel',
-        fontSize: 16,
-        lineHeight: 1.6,
-      },
+      apiKeys,
+      preferences,
       licenseStatus: (profile?.license_status as LicenseStatus) || 'trial',
       licenseKey: profile?.license_key,
       storage: {
@@ -204,26 +234,55 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       // Save to Supabase database
       for (const [provider, apiKey] of Object.entries(keys)) {
-        if (apiKey) {
-          await supabaseDB.saveAPIKey(state.user.id, provider, apiKey);
+        if (apiKey && apiKey.trim()) {
+          const { error } = await supabaseDB.saveAPIKey(state.user.id, provider, apiKey);
+          if (error) {
+            console.error(`Error saving ${provider} API key:`, error);
+            throw new Error(`Failed to save ${provider} API key: ${error.message}`);
+          }
+        } else if (apiKey === '' || apiKey === null) {
+          // Delete API key if empty
+          const { error } = await supabase
+            .from('user_api_keys')
+            .delete()
+            .eq('user_id', state.user.id)
+            .eq('provider', provider);
+          if (error) {
+            console.error(`Error deleting ${provider} API key:`, error);
+          }
         }
+      }
+
+      // Reload API keys from database to ensure sync
+      const { data: apiKeysData } = await supabaseDB.getAPIKeys(state.user.id);
+      const updatedApiKeys: APIKeys = {
+        openai: '',
+        gemini: '',
+        grok: '',
+        claude: '',
+      };
+      
+      if (apiKeysData) {
+        apiKeysData.forEach((keyData: any) => {
+          if (keyData.provider && keyData.api_key_encrypted) {
+            updatedApiKeys[keyData.provider as keyof APIKeys] = keyData.api_key_encrypted;
+          }
+        });
       }
 
       // Update local state
       const updatedUser: User = {
         ...state.user,
-        apiKeys: {
-          ...state.user.apiKeys,
-          ...keys,
-        },
+        apiKeys: updatedApiKeys,
       };
 
       setState(prev => ({
         ...prev,
         user: updatedUser,
       }));
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving API keys:', error);
+      throw error; // Re-throw to show error to user
     }
   };
 
@@ -231,29 +290,33 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (!state.user) return;
 
     try {
-      // Update in Supabase
-      await supabaseDB.updateProfile(state.user.id, {
-        preferences: {
-          ...state.user.preferences,
-          ...prefs,
-        },
+      const updatedPreferences = {
+        ...state.user.preferences,
+        ...prefs,
+      };
+
+      // Update in Supabase (store as JSON string)
+      const { error } = await supabaseDB.updateProfile(state.user.id, {
+        preferences: JSON.stringify(updatedPreferences),
       });
+
+      if (error) {
+        throw new Error(`Failed to save preferences: ${error.message}`);
+      }
 
       // Update local state
       const updatedUser: User = {
         ...state.user,
-        preferences: {
-          ...state.user.preferences,
-          ...prefs,
-        },
+        preferences: updatedPreferences,
       };
 
       setState(prev => ({
         ...prev,
         user: updatedUser,
       }));
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating preferences:', error);
+      throw error; // Re-throw to show error to user
     }
   };
 

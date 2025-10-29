@@ -70,18 +70,26 @@ const SettingsPage: React.FC = () => {
 
     setSavingKeys(provider);
     
-    // Simulate API validation
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    updateAPIKeys({ [provider]: key });
-    toast.success(`${providers.find(p => p.id === provider)?.name} API key saved!`);
-    setSavingKeys(null);
+    try {
+      await updateAPIKeys({ [provider]: key });
+      toast.success(`${providers.find(p => p.id === provider)?.name} API key saved!`);
+    } catch (error: any) {
+      console.error('Error saving API key:', error);
+      toast.error(`Failed to save API key: ${error.message || 'Unknown error'}`);
+    } finally {
+      setSavingKeys(null);
+    }
   };
 
-  const handleRemoveKey = (provider: LLMProvider) => {
-    updateAPIKeys({ [provider]: undefined });
-    setApiKeys(prev => ({ ...prev, [provider]: '' }));
-    toast.success(`${providers.find(p => p.id === provider)?.name} API key removed`);
+  const handleRemoveKey = async (provider: LLMProvider) => {
+    try {
+      await updateAPIKeys({ [provider]: '' });
+      setApiKeys(prev => ({ ...prev, [provider]: '' }));
+      toast.success(`${providers.find(p => p.id === provider)?.name} API key removed`);
+    } catch (error: any) {
+      console.error('Error removing API key:', error);
+      toast.error(`Failed to remove API key: ${error.message || 'Unknown error'}`);
+    }
   };
 
   const themeOptions = [

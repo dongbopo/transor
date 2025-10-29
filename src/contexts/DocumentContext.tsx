@@ -1,6 +1,8 @@
-import React, { createContext, useContext, useReducer, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
 import { ParsedDocument, DocumentFile, ProcessingStatus, ViewMode, Translation, BilingualView, LLMProvider } from '../types';
 import { LLMTranslationService } from '../services/LLMTranslationService';
+import { supabaseDB, supabaseStorage } from '../lib/supabase';
+import { useAuth } from './AuthContext';
 import toast from 'react-hot-toast';
 
 interface DocumentState {
@@ -114,18 +116,132 @@ interface DocumentProviderProps {
 
 export const DocumentProvider: React.FC<DocumentProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(documentReducer, initialState);
+  const { user, isAuthenticated } = useAuth();
+
+  // Load documents from Supabase on mount and when user changes
+  // Reset documents when user logs out
+  useEffect(() => {
+    if (!isAuthenticated || !user) {
+      dispatch({ type: 'SET_LOADING', payload: false });
+      // Clear documents when logged out
+      if (state.documents.length > 0) {
+        dispatch({ type: 'SET_CURRENT_DOCUMENT', payload: null });
+      }
+      return;
+    }
+
+    const loadDocuments = async () => {
+      try {
+        dispatch({ type: 'SET_LOADING', payload: true });
+        const { data: docs, error } = await supabaseDB.getDocuments(user.id);
+        
+        if (error) {
+          console.error('Error loading documents:', error);
+          dispatch({ type: 'SET_ERROR', payload: error.message });
+          return;
+        }
+
+        if (docs) {
+          // Convert Supabase documents to ParsedDocument format
+          const parsedDocs: ParsedDocument[] = docs.map((doc: any) => ({
+            id: doc.id,
+            originalFile: {
+              id: doc.id,
+              name: doc.original_filename || doc.title,
+              size: doc.file_size_bytes || 0,
+              type: doc.file_type || 'application/pdf',
+              file: new File([], doc.original_filename || doc.title), // Placeholder
+              uploadedAt: new Date(doc.created_at),
+            },
+            content: doc.content || {
+              text: '',
+              structure: {
+                headings: [],
+                paragraphs: [],
+                lists: [],
+                tables: [],
+                footnotes: [],
+              },
+              images: [],
+              metadata: {
+                pageCount: doc.page_count || 0,
+                wordCount: doc.word_count || 0,
+                characterCount: doc.character_count || 0,
+                language: doc.source_language,
+              },
+            },
+            status: {
+              stage: doc.status || 'completed',
+              progress: doc.progress || 100,
+              message: doc.status_message || 'Completed',
+            },
+            createdAt: new Date(doc.created_at),
+            updatedAt: new Date(doc.updated_at || doc.created_at),
+            targetLanguage: doc.target_language,
+          }));
+
+          parsedDocs.forEach(doc => {
+            dispatch({ type: 'ADD_DOCUMENT', payload: doc });
+          });
+        }
+      } catch (error: any) {
+        console.error('Error loading documents:', error);
+        dispatch({ type: 'SET_ERROR', payload: error.message });
+      } finally {
+        dispatch({ type: 'SET_LOADING', payload: false });
+      }
+    };
+
+    loadDocuments();
+  }, [isAuthenticated, user?.id]);
 
   const uploadDocument = async (file: File): Promise<void> => {
+    if (!user || !isAuthenticated) {
+      throw new Error('Please log in to upload documents');
+    }
+
     dispatch({ type: 'SET_LOADING', payload: true });
     dispatch({ type: 'SET_ERROR', payload: null });
 
     try {
-      // This will be implemented with the document parsing service
-      // For now, create a mock document
+      // Upload file to Supabase Storage
+      const storagePath = `${user.id}/${Date.now()}_${file.name}`;
+      const { data: uploadData, error: uploadError } = await supabaseStorage.uploadFile(
+        user.id,
+        file,
+        storagePath
+      );
+
+      if (uploadError) {
+        throw new Error(`Upload failed: ${uploadError.message}`);
+      }
+
+      // Create document record in database
+      const documentData = {
+        title: file.name.replace(/\.[^/.]+$/, ''),
+        original_filename: file.name,
+        file_type: file.type,
+        file_size_bytes: file.size,
+        storage_path: storagePath,
+        status: 'uploading',
+        progress: 0,
+        status_message: 'Uploading document...',
+        page_count: 0,
+        word_count: 0,
+        character_count: 0,
+      };
+
+      const { data: dbDoc, error: dbError } = await supabaseDB.createDocument(user.id, documentData);
+
+      if (dbError) {
+        throw new Error(`Failed to save document: ${dbError.message}`);
+      }
+
+      // Create ParsedDocument for local state
       const document: ParsedDocument = {
-        id: crypto.randomUUID(),
+        id: dbDoc.id,
         originalFile: {
-          id: crypto.randomUUID(),
+          id: dbDoc.id,
           name: file.name,
           size: file.size,
           type: file.type,
@@ -159,8 +275,11 @@ export const DocumentProvider: React.FC<DocumentProviderProps> = ({ children }) 
 
       dispatch({ type: 'ADD_DOCUMENT', payload: document });
       dispatch({ type: 'SET_CURRENT_DOCUMENT', payload: document });
+      toast.success('Document uploaded successfully!');
     } catch (error) {
-      dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Upload failed' });
+      const errorMessage = error instanceof Error ? error.message : 'Upload failed';
+      dispatch({ type: 'SET_ERROR', payload: errorMessage });
+      toast.error(errorMessage);
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
