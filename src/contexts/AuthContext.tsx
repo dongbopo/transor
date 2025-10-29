@@ -232,45 +232,52 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (!state.user) return;
 
     try {
-      // Save to Supabase database
-      for (const [provider, apiKey] of Object.entries(keys)) {
+      // Prepare updates for local state
+      const updatedApiKeys: APIKeys = {
+        ...state.user.apiKeys,
+      };
+
+      // Save to Supabase database (parallel operations)
+      const savePromises = Object.entries(keys).map(async ([provider, apiKey]) => {
         if (apiKey && apiKey.trim()) {
-          const { error } = await supabaseDB.saveAPIKey(state.user.id, provider, apiKey);
+          // Add timeout to prevent hanging
+          const savePromise = supabaseDB.saveAPIKey(state.user!.id, provider, apiKey);
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Request timeout')), 10000)
+          );
+          
+          const { error } = await Promise.race([savePromise, timeoutPromise]) as any;
           if (error) {
             console.error(`Error saving ${provider} API key:`, error);
             throw new Error(`Failed to save ${provider} API key: ${error.message}`);
           }
-        } else if (apiKey === '' || apiKey === null) {
+          // Update local state immediately
+          updatedApiKeys[provider as keyof APIKeys] = apiKey;
+        } else if (apiKey === '' || apiKey === null || apiKey === undefined) {
           // Delete API key if empty
-          const { error } = await supabase
+          const deletePromise = supabase
             .from('user_api_keys')
             .delete()
-            .eq('user_id', state.user.id)
+            .eq('user_id', state.user!.id)
             .eq('provider', provider);
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Request timeout')), 10000)
+          );
+          
+          const { error } = await Promise.race([deletePromise, timeoutPromise]) as any;
           if (error) {
             console.error(`Error deleting ${provider} API key:`, error);
+            // Don't throw for delete errors, just log
           }
+          // Update local state immediately
+          updatedApiKeys[provider as keyof APIKeys] = '';
         }
-      }
+      });
 
-      // Reload API keys from database to ensure sync
-      const { data: apiKeysData } = await supabaseDB.getAPIKeys(state.user.id);
-      const updatedApiKeys: APIKeys = {
-        openai: '',
-        gemini: '',
-        grok: '',
-        claude: '',
-      };
-      
-      if (apiKeysData) {
-        apiKeysData.forEach((keyData: any) => {
-          if (keyData.provider && keyData.api_key_encrypted) {
-            updatedApiKeys[keyData.provider as keyof APIKeys] = keyData.api_key_encrypted;
-          }
-        });
-      }
+      // Wait for all saves to complete
+      await Promise.all(savePromises);
 
-      // Update local state
+      // Update local state immediately (no need to reload from DB)
       const updatedUser: User = {
         ...state.user,
         apiKeys: updatedApiKeys,
