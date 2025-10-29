@@ -164,14 +164,24 @@ export const supabaseDB = {
 
   // Save API key
   saveAPIKey: async (userId: string, provider: string, apiKey: string) => {
+    // Only include columns that definitely exist
+    // last_validated_at is optional and may not exist in all database setups
+    const upsertData: any = {
+      user_id: userId,
+      provider,
+      api_key_encrypted: apiKey, // TODO: Encrypt on backend
+      is_valid: true,
+    };
+
+    // Note: last_validated_at is optional - only add if your schema has it
+    // If you get schema errors, either:
+    // 1. Remove this line, OR
+    // 2. Run FIX_API_KEYS_SCHEMA.sql to add the column
+
     const { data, error } = await supabase
       .from('user_api_keys')
-      .upsert({
-        user_id: userId,
-        provider,
-        api_key_encrypted: apiKey, // TODO: Encrypt on backend
-        is_valid: true,
-        last_validated_at: new Date().toISOString(),
+      .upsert(upsertData, {
+        onConflict: 'user_id,provider',
       })
       .select()
       .single();
